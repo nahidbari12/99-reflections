@@ -10,18 +10,10 @@ channel = "stable-24_05"
 language = "nodejs"
 
 [deployment]
-deploymentTarget = "cloudrun"
+deploymentTarget = "static"
 build = ["npm", "run", "build"]
-run = ["run = "node index.js"] 
-
-[[ports]]
-localPort = 3001
-externalPort = 3001
+publicDir = "dist"
 
 [[ports]]
 localPort = 5173
 externalPort = 80
-
-[[ports]]
-localPort = 5174
-externalPort = 3001
