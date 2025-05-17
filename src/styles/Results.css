@@ -1,0 +1,167 @@
+/* /src/styles/Results.css */
+
+.results-page {
+  background-color: #0b1b36;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  min-height: 100vh;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.results-page.fade-in h1 {
+  animation: scaleIn 0.6s ease-in-out;
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.results-player,
+.results-room,
+.results-streak,
+.results-accuracy,
+.results-score {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.results-score {
+  font-size: 20px;
+  font-weight: bold;
+  color: #facc15;
+}
+
+/* ✅ Multiplayer Comparison */
+.head-to-head {
+  margin-top: 30px;
+  padding: 10px;
+  border: 2px solid #facc15;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  width: 100%;
+  max-width: 360px;
+}
+
+.head-to-head h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #facc15;
+}
+
+.head-to-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-box {
+  flex: 1;
+  padding: 10px;
+}
+
+.player-box h4 {
+  margin-bottom: 5px;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.player-box p {
+  font-size: 14px;
+  margin: 3px 0;
+}
+
+.vs {
+  font-weight: bold;
+  font-size: 18px;
+  margin: 0 10px;
+  color: #f87171;
+}
+
+.review-section {
+  margin-top: 20px;
+  text-align: left;
+  max-width: 300px;
+}
+
+.review-section h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #f87171;
+}
+
+.review-section ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.review-section li {
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+/* ✅ Button Group */
+.results-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* ✅ Gold + Exit Buttons */
+.gold-button {
+  background-color: #facc15;
+  color: #0a1440;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.gold-button:hover {
+  background-color: #eab308;
+}
+
+.exit-button {
+  background-color: #444;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.exit-button:hover {
+  background-color: #666;
+}
+
+/* ⬅ Back to Home */
+.back-home-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+.back-home-button:hover {
+  background-color: white;
+  color: #0a1440;
+  transform: translateY(-2px);
+}

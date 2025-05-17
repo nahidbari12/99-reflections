@@ -1,0 +1,154 @@
+/* /src/styles/Flashcard.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Amiri&family=Lato:wght@600&display=swap');
+
+.flashcard-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  background-color: #0b1b36;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  color: white;
+}
+
+.progress-container {
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 20px;
+}
+
+.progress-text {
+  text-align: center;
+  margin-bottom: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.progress-bar {
+  width: 100%;
+  background-color: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 10px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #facc15;
+  transition: width 0.3s ease;
+}
+
+.flashcard-wrapper {
+  width: 90%;
+  max-width: 300px;
+  height: 200px;
+  perspective: 1000px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flashcard {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  text-align: center;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+}
+
+.flashcard.flip {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+}
+
+.arabic-name {
+  font-family: 'Amiri', serif;
+  font-size: 64px;
+  color: #7b4f1d;
+  margin-bottom: 10px;
+  direction: rtl;
+}
+
+.english-name {
+  font-family: 'Lato', sans-serif;
+  font-size: 20px;
+  color: #0a1440;
+  font-weight: 600;
+}
+
+.english-meaning {
+  font-size: 20px;
+  font-weight: bold;
+  color: #0a1440;
+  text-align: center;
+}
+
+.flashcard-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.flashcard-buttons button {
+  background-color: #facc15;
+  color: #0a1440;
+  border: none;
+  padding: 10px 16px;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.flashcard-buttons button:hover {
+  background-color: #eab308;
+}
+
+.back-home-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+.back-home-button:hover {
+  background-color: white;
+  color: #0a1440;
+  transform: translateY(-2px);
+}

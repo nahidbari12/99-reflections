@@ -1,0 +1,57 @@
+/* /src/styles/About.css */
+
+.about-page {
+  background-color: #0b1b36;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.about-content {
+  max-width: 600px;
+  background-color: rgba(11, 27, 54, 0.9);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  text-align: left;
+}
+
+.about-content h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.about-content p {
+  margin-bottom: 16px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.about-content a {
+  color: #facc15;
+  text-decoration: underline;
+}
+
+.back-home-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+.back-home-button:hover {
+  background-color: white;
+  color: #0a1440;
+  transform: translateY(-2px);
+}

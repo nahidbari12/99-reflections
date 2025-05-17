@@ -1,0 +1,89 @@
+/* /src/styles/Match.css */
+
+.match-page {
+  background-color: #0b1b36;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  min-height: 100vh;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.room-code-box {
+  font-size: 24px;
+  background-color: #facc15;
+  color: #0a1440;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+/* Username input */
+.room-code-input {
+  padding: 10px 16px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  margin: 10px 0 10px;
+  text-align: center;
+  width: 250px;
+}
+
+/* Error message */
+.error-text {
+  color: #ff6b6b;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+.match-button {
+  background-color: #facc15;
+  color: #0a1440;
+  padding: 12px 24px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.match-button:hover {
+  background-color: #eab308;
+  transform: scale(1.05);
+}
+
+/* Back button styled to match app theme */
+.back-home-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+.back-home-button:hover {
+  background-color: white;
+  color: #0a1440;
+  transform: translateY(-2px);
+}

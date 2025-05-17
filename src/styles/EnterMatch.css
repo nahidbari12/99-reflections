@@ -1,0 +1,35 @@
+.enter-match-page {
+  background-color: #0b1b36;
+  color: white;
+  padding: 60px 20px;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.match-input {
+  display: block;
+  margin: 10px auto;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  width: 80%;
+  max-width: 300px;
+}
+
+.enter-room-button {
+  margin-top: 20px;
+  background-color: #facc15;
+  color: #0a1440;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.enter-room-button:hover {
+  background-color: #eab308;
+}

@@ -1,0 +1,259 @@
+/* /src/styles/ChallengeMode.css */
+
+.challenge-page {
+  background-color: #0b1b36;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
+.top-bar {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.timer {
+  font-size: 20px;
+}
+
+.score-streak {
+  text-align: right;
+}
+
+.score-box,
+.streak-text {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.challenge-flashcard {
+  background-color: #f9f9f9;
+  color: #0a1440;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.circle-timer {
+  margin: 10px auto 0;
+  width: 40px;
+  height: 40px;
+}
+
+.timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #e5e7eb;
+  stroke-width: 4;
+}
+
+.circle {
+  fill: none;
+  stroke: #facc15;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.bonus-banner {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #facc15;
+  color: #0a1440;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  animation: fadePop 0.3s ease;
+}
+
+@keyframes fadePop {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.9); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+.answer-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+.answer-options.grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.answer-button {
+  padding: 10px 16px;
+  background-color: #facc15;
+  color: #0a1440;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.answer-button:hover {
+  background-color: #eab308;
+  transform: scale(1.05);
+}
+
+.answer-button.correct {
+  background-color: #4ade80;
+  color: white;
+}
+
+.answer-button.wrong {
+  background-color: #f87171;
+  color: white;
+}
+
+/* Shared Buttons */
+.gold-button {
+  background-color: #facc15;
+  color: #0a1440;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.gold-button:hover {
+  background-color: #eab308;
+}
+
+.exit-button {
+  background-color: #444;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.exit-button:hover {
+  background-color: #666;
+}
+
+/* Back & Exit Button (shared) */
+.back-home-button,
+.exit-mode-button,
+.exit-lobby-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+.back-home-button:hover,
+.exit-mode-button:hover,
+.exit-lobby-button:hover {
+  background-color: white;
+  color: #0a1440;
+  transform: translateY(-2px);
+}
+
+/* Waiting Room */
+.waiting-room {
+  text-align: center;
+  margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.waiting-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.waiting-subtext {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.player-status {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.waiting-message {
+  font-size: 14px;
+  margin-bottom: 25px;
+  color: #facc15;
+}
+
+/* Loader Animation */
+.animated-loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #facc15;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Shake animation for wrong answers */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.challenge-flashcard.shake {
+  animation: shake 0.4s ease;
+}

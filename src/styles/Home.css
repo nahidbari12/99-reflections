@@ -1,0 +1,73 @@
+.home-container {
+  height: 100vh;
+  width: 100%;
+  background-color: #0b1b36; /* Deep night blue */
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png"); /* Tiny stars */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.home-banner {
+  position: relative;
+  text-align: center;
+  padding: 40px 20px;
+  background-color: rgba(11, 27, 54, 0.85); /* Blue box behind title */
+  border-radius: 12px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+  margin-bottom: 30px;
+}
+
+.home-banner::before {
+  content: "";
+  background-image: url("/images/eid-mubarak.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.15;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.home-title,
+.home-subtitle {
+  position: relative;
+  z-index: 1;
+}
+
+.home-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #f8e9a1;
+}
+
+.home-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #d1d5db;
+}
+
+.start-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #facc15;
+  color: #0b1b36;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.start-button:hover {
+  background-color: #eab308;
+  transform: scale(1.05);
+}

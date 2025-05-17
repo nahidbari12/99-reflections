@@ -1,0 +1,32 @@
+// /src/utils/socketClient.jsk
+
+let socket;
+
+export function connectToSocket() {
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    socket = new WebSocket("ws://localhost:3001"); // ✅ You’ll replace this in production
+  }
+
+  return socket;
+}
+
+export function sendMessage(type, payload) {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type, payload }));
+  }
+}
+
+export function onMessage(callback) {
+  if (socket) {
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      callback(data);
+    };
+  }
+}
+
+export function closeSocket() {
+  if (socket) {
+    socket.close();
+  }
+}
