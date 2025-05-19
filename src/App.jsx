@@ -1,8 +1,8 @@
 // /src/App.jsx
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   Link,
@@ -17,7 +17,7 @@ import GlobalMusicPlayer from "./components/GlobalMusicPlayer";
 import About from "./components/About";
 import "./styles/GlobalMusicPlayer.css";
 
-// ✅ Home page with About link
+// ✅ Basic wrapper
 function HomeWithAboutLink() {
   return (
     <div>
@@ -40,6 +40,11 @@ function HomeWithAboutLink() {
 }
 
 function App() {
+  // ✅ Set the document title for tab + bookmark
+  useEffect(() => {
+    document.title = "99NamesOfAllah.org – Asma’ul Husna Flashcards";
+  }, []);
+
   return (
     <>
       <GlobalMusicPlayer />
