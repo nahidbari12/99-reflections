@@ -1,19 +1,17 @@
-// Navbar.js
+import React from "react";
 
-import React from 'react';
-
-function Navbar({ onNavigate }) {
+function Navbar() {
   return (
-    <nav style={{ display: 'flex', justifyContent: 'space-around', background: '#282c34', padding: '10px' }}>
-      <button onClick={() => onNavigate('home')} style={{ color: 'white', background: 'transparent', border: 'none', fontSize: '18px' }}>
-        Home
-      </button>
-      <button onClick={() => onNavigate('game')} style={{ color: 'white', background: 'transparent', border: 'none', fontSize: '18px' }}>
-        Play
-      </button>
-      <button onClick={() => onNavigate('leaderboard')} style={{ color: 'white', background: 'transparent', border: 'none', fontSize: '18px' }}>
-        Leaderboard
-      </button>
+    <nav>
+      <ul>
+        <li>
+          {/* ✅ Fixed href */}
+          <a href="/about">About</a>
+        </li>
+        <li>
+          <a href="/gamer-mode">Gamer Mode</a>
+        </li>
+      </ul>
     </nav>
   );
 }

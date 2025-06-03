@@ -1,8 +1,6 @@
-// /src/App.jsx
-
 import React, { useEffect } from "react";
 import {
-  HashRouter as Router,
+  BrowserRouter as Router,
   Routes,
   Route,
   Link,
@@ -15,9 +13,16 @@ import ChallengeMode from "./components/ChallengeMode";
 import Results from "./components/Results";
 import GlobalMusicPlayer from "./components/GlobalMusicPlayer";
 import About from "./components/About";
+
+import GamerMode from "./components/GamerMode";
+import TicTacToeGame from "./components/TicTacToeGame";
+import TicTacToeResults from "./components/TicTacToeResults";
+import ChessBoardWrapper from "./components/ChessBoardWrapper";
+import ChessResults from "./components/ChessResults";
+import ChessDifficulty from "./components/ChessDifficulty"; // ✅ ADDED
+
 import "./styles/GlobalMusicPlayer.css";
 
-// ✅ Basic wrapper
 function HomeWithAboutLink() {
   return (
     <div>
@@ -40,7 +45,6 @@ function HomeWithAboutLink() {
 }
 
 function App() {
-  // ✅ Set the document title for tab + bookmark
   useEffect(() => {
     document.title = "99NamesOfAllah.org – Asma’ul Husna Flashcards";
   }, []);
@@ -56,6 +60,20 @@ function App() {
           <Route path="/challenge" element={<ChallengeMode />} />
           <Route path="/results" element={<Results />} />
           <Route path="/about" element={<About />} />
+
+          {/* ✅ Gamer Mode Routes */}
+          <Route path="/gamer-mode" element={<GamerMode />} />
+          <Route path="/gamer-mode/tic-tac-toe" element={<TicTacToeGame />} />
+          <Route path="/gamer-mode/results" element={<TicTacToeResults />} />
+          <Route path="/gamer-mode/chess-difficulty" element={<ChessDifficulty />} /> {/* ✅ NEW */}
+          <Route path="/gamer-mode/chess" element={<ChessBoardWrapper />} />
+          <Route path="/gamer-mode/chess-results" element={<ChessResults />} />
+
+          {/* ✅ NEW: Chess results route used after checkmate */}
+          <Route path="/chess-results" element={<ChessResults />} />
+
+          {/* 🧪 Optional testing route */}
+          <Route path="/test-chess" element={<ChessBoardWrapper />} />
         </Routes>
       </Router>
     </>

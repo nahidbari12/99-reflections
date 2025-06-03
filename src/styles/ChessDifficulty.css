@@ -1,0 +1,60 @@
+.cpu-difficulty-page {
+  background-color: #0b1b36;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+}
+
+.cpu-difficulty-page h1 {
+  font-size: 28px;
+  color: #facc15;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.cpu-difficulty-page p {
+  font-size: 16px;
+  margin-bottom: 24px;
+  text-align: center;
+  max-width: 400px;
+}
+
+.difficulty-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.difficulty-button {
+  padding: 12px;
+  background-color: #facc15;
+  color: #0b1b36;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.difficulty-button:hover {
+  background-color: #ffe066;
+}
+
+.back-button {
+  margin-top: 24px;
+  background-color: transparent;
+  color: #facc15;
+  font-size: 14px;
+  text-decoration: underline;
+  border: none;
+  cursor: pointer;
+}

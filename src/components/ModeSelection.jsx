@@ -28,6 +28,10 @@ function ModeSelection() {
     setShowDifficultyOptions(false);
   };
 
+  const handleGamerMode = () => {
+    navigate("/gamer-mode");
+  };
+
   return (
     <div className="mode-selection-page">
       <div className="mode-selection-content">
@@ -40,6 +44,9 @@ function ModeSelection() {
             </button>
             <button className="mode-button challenge" onClick={handleChallengeClick}>
               🎯 Challenge Mode
+            </button>
+            <button className="mode-button gamer" onClick={handleGamerMode}>
+              🎮 Gamer Mode
             </button>
           </>
         ) : (

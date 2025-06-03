@@ -8,7 +8,7 @@ function Results() {
   const navigate = useNavigate();
 
   const {
-    score,
+    score = 0,
     correct = 0,
     wrong = 0,
     totalQuestions = correct + wrong,
@@ -21,6 +21,7 @@ function Results() {
     opponentScore,
     opponentStreak,
     opponentCorrect,
+    winner,
   } = location.state || {};
 
   const [fadeIn, setFadeIn] = useState(false);
@@ -49,6 +50,8 @@ function Results() {
     <div className={`results-page ${fadeIn ? "fade-in" : ""}`}>
       <h1>🎉 Challenge Complete!</h1>
       <p className="results-player">👤 {username}</p>
+
+      {winner && <p className="results-winner">🏁 Winner: {winner}</p>}
 
       {isMultiplayer && roomCode && (
         <p className="results-room">🏷️ Room Code: <strong>{roomCode}</strong></p>

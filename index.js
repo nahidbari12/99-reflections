@@ -1,28 +1,24 @@
-// index.js (CommonJS syntax, compatible with Replit Deploy)
+// index.js
 
 const express = require("express");
 const path = require("path");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// ✅ Serve static files from dist (build output)
+// ✅ Always serve static assets from the Vite build output
 app.use(express.static(path.join(__dirname, "dist")));
 
-// ✅ Serve public static assets like audio or images
+// ✅ Serve static audio and image files from /public
 app.use("/audio", express.static(path.join(__dirname, "public/audio")));
 app.use("/images", express.static(path.join(__dirname, "public/images")));
 
-// ✅ React Router fallback (only for non-asset routes)
+// ✅ React Router fallback — serve index.html for all unmatched routes
 app.get("*", (req, res) => {
-  // If request is for a static asset, skip index fallback
-  const ext = path.extname(req.url);
-  if (ext) return res.status(404).send("Not Found");
-
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  res.sendFile(path.join(__dirname, "dist/index.html"));
 });
 
-// ✅ Port setup for Replit Deploy
-const PORT = process.env.PORT || 3000;
+// ✅ Start the server
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
