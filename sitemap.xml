@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+>
+
+  <!-- 🏠 Home -->
+  <url>
+    <loc>https://99namesofallah.org/</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 🔢 Mode Selection / Main Hub (if you have this route) -->
+  <url>
+    <loc>https://99namesofallah.org/mode-selection</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 📖 Flashcards: Learn the 99 Names -->
+  <url>
+    <loc>https://99namesofallah.org/flashcard</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 📅 Daily Quiz -->
+  <url>
+    <loc>https://99namesofallah.org/daily-quiz</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ⚔️ Challenge Mode -->
+  <url>
+    <loc>https://99namesofallah.org/challenge-mode</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 🎮 Gamer Mode Hub -->
+  <url>
+    <loc>https://99namesofallah.org/gamer-mode</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 🎮 Gamer Mode: Tic-Tac-Toe -->
+  <url>
+    <loc>https://99namesofallah.org/gamer-mode/tictactoe</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 🎮 Gamer Mode: Chess -->
+  <url>
+    <loc>https://99namesofallah.org/gamer-mode/chess</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 🎮 Gamer Mode: Checkers -->
+  <url>
+    <loc>https://99namesofallah.org/gamer-mode/checkers</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 🎮 Gamer Mode: Ludo -->
+  <url>
+    <loc>https://99namesofallah.org/gamer-mode/ludo</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 🎮 Gamer Mode: Divine Descent -->
+  <url>
+    <loc>https://99namesofallah.org/gamer-mode/divine-descent</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 🎮 Gamer Mode: Birds of Paradise -->
+  <url>
+    <loc>https://99namesofallah.org/gamer-mode/birds-of-paradise</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 👥 Multiplayer / Online Challenges (if exists) -->
+  <url>
+    <loc>https://99namesofallah.org/multiplayer</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ℹ️ About / Project Story (if exists) -->
+  <url>
+    <loc>https://99namesofallah.org/about</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- 📚 Future: Reflections page (if/when you add it) -->
+  <!--
+  <url>
+    <loc>https://99namesofallah.org/reflections</loc>
+    <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  -->
+
+</urlset>
