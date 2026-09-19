@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VD5VPBSD32"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-VD5VPBSD32', { send_page_view: false });
+    </script>
+
+    <meta charset="UTF-8" />
+
+    <!-- ✅ Correct mobile viewport + safe-area support -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
+    <!-- Optional but recommended for Android WebView polish -->
+    <meta name="theme-color" content="#0b1b36" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/oldfavicon.png" />
+
+    <!-- ✅ Prevent white borders/flash by matching page background to theme -->
+    <meta name="background-color" content="#0b1b36" />
+    <style>
+      html,
+      body {
+        background: #0b1b36;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
+    <meta
+      name="description"
+      content="Learn, remember, and reflect on the 99 Names of Allah through guided lessons, Arabic practice, daily quizzes, and meaningful challenges."
+    />
+    <link rel="canonical" href="https://99namesofallah.org/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="99 Reflections — Learn the 99 Names of Allah" />
+    <meta property="og:description" content="A calm daily journey for learning, remembering, and reflecting on the 99 Names of Allah." />
+    <meta property="og:image" content="https://99namesofallah.org/preview.png" />
+    <meta property="og:url" content="https://99namesofallah.org/" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <title>99NamesOfAllah.org – Asma’ul Husna</title>
+    <script type="module" crossorigin src="/assets/index-BJOmCZO1.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-kzm12jUz.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Restore deep links after GitHub Pages sends an unknown route through 404.html.
+      (function () {
+        var route = window.sessionStorage.getItem("spa-redirect");
+        if (route) {
+          window.sessionStorage.removeItem("spa-redirect");
+          window.history.replaceState(null, "", route);
+        }
+      })();
+    </script>
+    <script>
+      if ("serviceWorker" in navigator && location.protocol === "https:") {
+        window.addEventListener("load", function () { navigator.serviceWorker.register("/service-worker.js"); });
+      }
+    </script>
+  </body>
+</html>

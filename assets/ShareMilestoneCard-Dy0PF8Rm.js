@@ -1,0 +1,3 @@
+import{r as c,j as s}from"./index-BJOmCZO1.js";function x({title:e,value:a,subtitle:t}){const[r,n]=c.useState(""),l=async()=>{var i;const o=`${e}: ${a}
+${t}
+Continue your journey at https://99namesofallah.org`;try{navigator.share?await navigator.share({title:"My 99 Names journey",text:o}):(await((i=navigator.clipboard)==null?void 0:i.writeText(o)),n("Copied!"))}catch{n("")}};return s.jsxs("aside",{className:"share-milestone",children:[s.jsxs("div",{children:[s.jsx("span",{children:"✦ 99NamesOfAllah.org"}),s.jsx("h3",{children:e}),s.jsx("strong",{children:a}),s.jsx("p",{children:t})]}),s.jsx("button",{onClick:l,children:"Share milestone"}),r&&s.jsx("small",{role:"status",children:r})]})}export{x as S};
