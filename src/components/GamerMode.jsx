@@ -16,6 +16,9 @@ const GAMES = [
   { id:"tic-tac-toe", to:"/gamer-mode/tic-tac-toe", icon:"❌", title:"Tic-Tac-Toe", skill:"Meanings + tactics", time:"3–6 min", difficulty:"Quick" },
 ];
 
+const quizBattle = { id:"quiz-battle", to:"/gamer-mode/quiz-battle", icon:"⚔️", title:"Quiz Battle", skill:"Private rooms", time:"10 questions", difficulty:"1 vs 1" };
+const availableGames = import.meta.env.VITE_MULTIPLAYER_URL ? [...GAMES, quizBattle] : GAMES;
+
 export default function GamerMode() {
   const navigate=useNavigate();
   const [stats,setStats]=useState(loadGameStats);
@@ -26,8 +29,7 @@ export default function GamerMode() {
     <div className="gamer-mode-header"><span className="gamer-eyebrow">PLAY WITH PURPOSE</span><h1>🎮 Gamer Mode</h1><p className="gamer-mode-tagline">Every answer now strengthens your Learn Mode mastery.</p></div>
     <section className="gamer-summary" aria-label="Game learning summary"><div><strong>{learning.attempts}</strong><span>learning answers</span></div><div><strong>{learning.retention}%</strong><span>retention</span></div><div><strong>{Object.values(stats).reduce((sum,item)=>sum+(Number(item?.plays)||0),0)}</strong><span>games played</span></div></section>
     <Link className="recommended-game" to={`${recommended.to}/`}><span>Recommended next</span><strong>{recommended.icon} {recommended.title}</strong><small>{recommended.skill} · {recommended.time}</small></Link>
-    <div className="gamer-mode-grid">{GAMES.map((game)=>{const gameStat=stats[game.id];return <Link key={game.id} to={`${game.to}/`} className="game-button active"><span className="game-icon">{game.icon}</span><span className="game-copy"><span className="game-title">{game.title}</span><small>{game.skill} · {game.time}</small></span><span className="game-meta"><b>{game.difficulty}</b><small>{gameStat?`${gameStat.plays} played${gameStat.bestScore?` · Best ${gameStat.bestScore}`:""}`:"New"}</small></span></Link>;})}</div>
-    {import.meta.env.VITE_MULTIPLAYER_URL && <Link to="/gamer-mode/quiz-battle/" className="game-button active"><span className="game-copy"><span className="game-title">Quiz Battle</span><small>Private two-player rooms and global Top 50</small></span></Link>}
+    <div className="gamer-mode-grid">{availableGames.map((game)=>{const gameStat=stats[game.id];return <Link key={game.id} to={`${game.to}/`} className="game-button active"><span className="game-icon">{game.icon}</span><span className="game-copy"><span className="game-title">{game.title}</span><small>{game.skill} · {game.time}</small></span><span className="game-meta"><b>{game.difficulty}</b><small>{gameStat?`${gameStat.plays} played${gameStat.bestScore?` · Best ${gameStat.bestScore}`:""}`:"New"}</small></span></Link>;})}</div>
     <p className="gamer-mode-mobile-hint">Keyboard controls are supported in Crossword, Scramble, Tic-Tac-Toe, and Birds of Paradise.</p>
     <button className="back-button" onClick={()=>navigate("/")}>← Back to Home</button>
   </div></div>;
