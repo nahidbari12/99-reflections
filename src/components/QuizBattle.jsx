@@ -23,7 +23,7 @@ async function api(path, body) {
   return data;
 }
 
-export default function QuizBattle() {
+export default function QuizBattle({ lantern = false }) {
   const [params] = useSearchParams();
   const [identity, setIdentity] = useState(readIdentity);
   const [username, setUsername] = useState(identity?.username || "");
@@ -44,7 +44,7 @@ export default function QuizBattle() {
   const leaderboardRequest = useRef(0);
 
   async function loadLeaders() {
-    if (!endpoint) return;
+    if (!endpoint || lantern) return;
     const request = ++leaderboardRequest.current;
     setLeaderError(false);
     try {
@@ -80,10 +80,14 @@ export default function QuizBattle() {
       const ws = new WebSocket(url);
       socket.current = ws;
       handshake = setTimeout(() => ws.close(), 12000);
-      ws.onopen = () => ws.send(JSON.stringify({ type: "hello", token: token.current }));
+      ws.onopen = () => ws.send(JSON.stringify({ type: "hello", token: token.current, game: lantern ? "lantern" : "quiz" }));
       ws.onmessage = event => {
         const state = JSON.parse(event.data);
         if (state.type !== "state" || cancelled) return;
+        if (lantern && state.game !== "lantern") {
+          ws.close(4003, "Lantern Match Duel is currently unavailable.");
+          return;
+        }
         clearTimeout(handshake);
         joined = true;
         failures = 0;
@@ -100,12 +104,12 @@ export default function QuizBattle() {
           connect();
           return;
         }
-        if (![1008, 4001, 4002].includes(event.code) && failures++ < 4) {
+        if (![1008, 4001, 4002, 4003].includes(event.code) && failures++ < 4) {
           retry = setTimeout(connect, 500 * 2 ** failures);
           return;
         }
         setError(event.reason || "Connection lost. Join the room again using its code.");
-        setCode(active.code);
+        setCode(joiningCode);
         setActive(null);
         setRoom(null);
       };
@@ -119,7 +123,7 @@ export default function QuizBattle() {
       socket.current?.close();
       socket.current = null;
     };
-  }, [active]);
+  }, [active, lantern]);
 
   useEffect(() => {
     if (!room?.until) return;
@@ -181,9 +185,9 @@ export default function QuizBattle() {
       <Link to="/gamer-mode/">← Gamer Mode</Link>
       <header className="battle-hero">
         <span className="battle-kicker">99 REFLECTIONS <span aria-hidden="true">✧</span> MULTIPLAYER</span>
-        <h1>Quiz Battle</h1>
-        <p>Challenge a friend to 10 questions on the meanings of Allah’s names.</p>
-        <div className="battle-rules"><span>1 vs 1</span><span>15 seconds per question</span><span>Streak bonuses</span></div>
+        <h1>{lantern ? "Lantern Match Duel" : "Quiz Battle"}</h1>
+        <p>{lantern ? "Race a friend to match six Names of Allah with their meanings." : "Challenge a friend to 10 questions on the meanings of Allah’s names."}</p>
+        <div className="battle-rules"><span>1 vs 1</span><span>{lantern ? "3-minute race" : "15 seconds per question"}</span><span>{lantern ? "6 pairs" : "Streak bonuses"}</span></div>
       </header>
 
       {!endpoint && <p role="status">Online play is currently unavailable.</p>}
@@ -194,7 +198,7 @@ export default function QuizBattle() {
             <input required value={username} onChange={event => setUsername(event.target.value)}
               autoComplete="nickname" maxLength={40} readOnly={!!identity?.username} />
           </label>
-          <small>Your username and best completed score appear on the public leaderboard. This browser remembers your profile.</small>
+          <small>{lantern ? "Your opponent sees your username. This browser remembers your profile." : "Your username and best completed score appear on the public leaderboard. This browser remembers your profile."}</small>
           <button type="button" disabled={busy || !username.trim()} onClick={() => enter("create")}>Create private room</button>
           <label>Room code
             <input value={code} onChange={event => setCode(event.target.value.toUpperCase().trim())}
@@ -232,6 +236,26 @@ export default function QuizBattle() {
                   {notice && <small role="status">{notice}</small>}
                 </>
               )}
+              {room.board && (
+                <>
+                  <div className="battle-row">
+                    <h2>{room.phase === "finished" ? "Review the pairs" : "Find the matching pairs"}</h2>
+                    {room.phase === "lantern" && <span aria-label="Time remaining">{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}</span>}
+                  </div>
+                  <div className="lantern-duel-board" aria-label="Lantern matching board">
+                    {room.board.map((card, index) => (
+                      <button key={index} type="button"
+                        className={card.matched ? "duel-matched" : card.text ? "duel-revealed" : ""}
+                        disabled={!online || room.phase !== "lantern" || !seconds || room.flipLocked || card.matched || !!card.text}
+                        aria-label={card.text ? undefined : card.kind + " card " + (index + 1)}
+                        onClick={() => send("flip", { match: room.match, index })}>
+                        <small>{card.pair ? "Pair " + card.pair : card.kind}</small>
+                        {card.text ? <span lang={card.kind === "Name" ? "ar" : undefined} dir="auto">{card.text}</span> : <span aria-hidden="true">🏮</span>}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
               {room.question && (
                 <>
                   <div className="battle-row"><span>Question {room.number} of {room.total}</span>
@@ -266,7 +290,7 @@ export default function QuizBattle() {
         </section>
       )}
 
-      {endpoint && <section className="battle-panel" aria-labelledby="battle-rankings">
+      {endpoint && !lantern && <section className="battle-panel" aria-labelledby="battle-rankings">
         <div className="battle-row"><h2 id="battle-rankings">Global Top 50</h2><button onClick={loadLeaders}>Refresh</button></div>
         <p>Ranked by best completed points score. Tied scores are ordered by username.</p>
         {leaderError && <p role="status">Could not load the leaderboard. Try refreshing.</p>}

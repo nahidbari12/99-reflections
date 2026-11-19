@@ -17,7 +17,8 @@ const GAMES = [
 ];
 
 const quizBattle = { id:"quiz-battle", to:"/gamer-mode/quiz-battle", icon:"⚔️", title:"Quiz Battle", skill:"Private rooms", time:"10 questions", difficulty:"1 vs 1" };
-const availableGames = import.meta.env.VITE_MULTIPLAYER_URL ? [...GAMES, quizBattle] : GAMES;
+const lanternDuel = { id:"lantern-duel", to:"/gamer-mode/lantern-duel", icon:"🏮", title:"Lantern Match Duel", skill:"Memory race", time:"3 min", difficulty:"1 vs 1" };
+const availableGames = import.meta.env.VITE_MULTIPLAYER_URL ? [...GAMES, quizBattle, lanternDuel] : GAMES;
 
 export default function GamerMode() {
   const navigate=useNavigate();

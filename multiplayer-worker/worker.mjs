@@ -2,6 +2,8 @@ import { blockedUsername } from "./username.mjs";
 import { DurableObject } from "cloudflare:workers";
 import names from "../src/data/names.jsx";
 
+const DUEL_MS = 180000;
+const PAIR_COUNT = 6;
 const QUESTION_MS = 15000;
 const REVEAL_MS = 2400;
 const ROOM_TTL = 30 * 60 * 1000;
@@ -161,7 +163,7 @@ export class BattleRoom extends DurableObject {
   nextAlarm(room) {
     const pending = this.ctx.getWebSockets().filter(ws => ws.readyState === 1 && !ws.deserializeAttachment()?.id)
       .map(ws => ws.deserializeAttachment().opened + 10000);
-    return Math.min(room?.deadline ?? Infinity, room?.expires ?? Infinity,
+    return Math.min(room?.deadline ?? Infinity, ...(room?.phase === "lantern" ? room.players.map(player => player.hideAt ?? Infinity) : []), room?.expires ?? Infinity,
       room?.unrecorded ? Date.now() + 1000 : Infinity, ...pending, Date.now() + ROOM_TTL);
   }
 
@@ -180,7 +182,11 @@ export class BattleRoom extends DurableObject {
       if (you === -1 || ws.readyState !== 1) continue;
       try {
         ws.send(JSON.stringify({
-          type: "state", points: !!room.points, code: room.code, phase: room.phase, players, you, total: ROUNDS,
+          type: "state", game: room.game ?? "quiz", board: room.deck?.map((card, index) => {
+            const player = room.players[you];
+            const matched = player.matched.includes(index);
+            return { matched, pair: room.phase === "finished" ? card.pair + 1 : undefined, kind: card.kind, text: matched || player.flipped.includes(index) || room.phase === "finished" ? card.text : null };
+          }), flipLocked: !!room.players[you].hideAt, points: !!room.points, code: room.code, phase: room.phase, players, you, total: room.game === "lantern" ? PAIR_COUNT : ROUNDS,
           number: room.index + 1, match: room.match, remaining: room.deadline ? Math.max(0, room.deadline - Date.now()) : 0,
           question: visible ? {
             arabic: question.arabic, name: question.name, options: question.options,
@@ -197,11 +203,42 @@ export class BattleRoom extends DurableObject {
   start(room) {
     room.points = room.code.length === 4;
     room.match = crypto.randomUUID();
+    if (room.game === "lantern") {
+      room.points = false;
+      room.deck = shuffled(shuffled(names).slice(0, PAIR_COUNT).flatMap((name, pair) => [
+        { pair, kind: "Name", text: name.arabic }, { pair, kind: "Meaning", text: name.meaning },
+      ]));
+      room.phase = "lantern";
+      room.deadline = Date.now() + DUEL_MS;
+      for (const player of room.players) Object.assign(player, { score: 0, answer: null, ready: false, matched: [], flipped: [], hideAt: null });
+      return;
+    }
     room.questions = questions();
     room.index = 0;
     room.phase = "question";
     room.deadline = Date.now() + QUESTION_MS;
     for (const player of room.players) Object.assign(player, { score: 0, streak: 0, answer: null, ready: false });
+  }
+
+  flip(room, player, index, now) {
+    if (!Number.isInteger(index) || index < 0 || index >= room.deck.length ||
+        player.matched.includes(index) || player.flipped.includes(index) || player.hideAt) return false;
+    player.flipped.push(index);
+    if (player.flipped.length === 2) {
+      const [first, second] = player.flipped;
+      if (room.deck[first].pair === room.deck[second].pair) {
+        player.matched.push(first, second);
+        player.flipped = [];
+        player.score++;
+        if (player.score === PAIR_COUNT) {
+          room.phase = "finished";
+          room.deadline = null;
+        }
+      } else {
+        player.hideAt = now + 900;
+      }
+    }
+    return true;
   }
 
   reveal(room) {
@@ -253,9 +290,12 @@ export class BattleRoom extends DurableObject {
           room = null;
         }
         if (!room && socket.mode === "create") {
-          room = { code: socket.code, phase: "lobby", players: [], index: -1, expires: Date.now() + ROOM_TTL };
+          room = { code: socket.code, game: message.game === "lantern" ? "lantern" : "quiz", phase: "lobby", players: [], index: -1, expires: Date.now() + ROOM_TTL };
         }
         if (!room) return ws.close(1008, "Room not found. Check the code.");
+        if ((room.game ?? "quiz") !== (message.game === "lantern" ? "lantern" : "quiz")) {
+          return ws.close(socket.mode === "create" ? 4002 : 1008, "This code belongs to a different game.");
+        }
         const existing = room.players.some(player => player.id === socket.id);
         if (socket.mode === "create" && room.players.length && !existing) return ws.close(4002, "Room code busy.");
         if (!existing && (room.phase !== "lobby" || room.players.length >= 2)) {
@@ -278,6 +318,9 @@ export class BattleRoom extends DurableObject {
       const bothConnected = room.players.length === 2 && room.players.every(item => this.connected(item.id));
       if (message.type === "start" && room.phase === "lobby" && player === room.players[0] && bothConnected) {
         this.start(room);
+      } else if (message.type === "flip" && room.phase === "lantern" && Date.now() < room.deadline &&
+        message.match === room.match) {
+        if (!this.flip(room, player, message.index, Date.now())) return;
       } else if (message.type === "answer" && room.phase === "question" && Date.now() < room.deadline &&
         message.match === room.match && message.number === room.index + 1 && player.answer === null &&
         Number.isInteger(message.choice) && message.choice >= 0 && message.choice < 4) {
@@ -323,8 +366,19 @@ export class BattleRoom extends DurableObject {
         if (pending) await this.ctx.storage.setAlarm(this.nextAlarm());
         return;
       }
+      if (room.phase === "lantern") {
+        for (const player of room.players) {
+          if (player.hideAt && player.hideAt <= now) {
+            player.flipped = [];
+            player.hideAt = null;
+          }
+        }
+      }
       if (room.deadline && room.deadline <= now) {
-        if (room.phase === "question") {
+        if (room.phase === "lantern") {
+          room.phase = "finished";
+          room.deadline = null;
+        } else if (room.phase === "question") {
           this.reveal(room);
         } else if (room.index + 1 < ROUNDS) {
           room.index++;
