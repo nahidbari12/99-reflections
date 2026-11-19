@@ -205,7 +205,9 @@ export class BattleRoom extends DurableObject {
     room.match = crypto.randomUUID();
     if (room.game === "lantern") {
       room.points = false;
-      room.deck = shuffled(shuffled(names).slice(0, PAIR_COUNT).flatMap((name, pair) => [
+      const distinct = new Map(shuffled(names).map(name => [name.meaning, name]));
+      const pairs = [...distinct.values()].slice(0, PAIR_COUNT);
+      room.deck = shuffled(pairs.flatMap((name, pair) => [
         { pair, kind: "Name", text: name.arabic }, { pair, kind: "Meaning", text: name.meaning },
       ]));
       room.phase = "lantern";
