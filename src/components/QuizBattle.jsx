@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import namesOfAllah from "../data/names";
 import "../styles/QuizBattle.css";
+
+const transliteratedNames = new Map(namesOfAllah.map(({ arabic, name }) => [arabic, name]));
 
 const endpoint = (import.meta.env.VITE_MULTIPLAYER_URL || "").replace(/\/+$/, "");
 const codePattern = /^(?:[0-9]{4}|[A-F0-9]{10})$/;
@@ -250,7 +253,7 @@ export default function QuizBattle({ lantern = false }) {
                         aria-label={card.text ? undefined : card.kind + " card " + (index + 1)}
                         onClick={() => send("flip", { match: room.match, index })}>
                         <small>{card.pair ? "Pair " + card.pair : card.kind}</small>
-                        {card.text ? <span lang={card.kind === "Name" ? "ar" : undefined} dir="auto">{card.text}</span> : <span aria-hidden="true">🏮</span>}
+                        {card.text ? <span dir="auto">{card.kind === "Name" ? transliteratedNames.get(card.text) ?? card.text : card.text}</span> : <span aria-hidden="true">🏮</span>}
                       </button>
                     ))}
                   </div>
