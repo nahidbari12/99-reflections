@@ -1,4 +1,4 @@
-const CACHE_NAME = "99-reflections-v9";
+const CACHE_NAME = "99-reflections-v11-seo";
 const CORE = ["/", "/manifest.webmanifest", "/favicon.png"];
 
 self.addEventListener("install", (event) => {
@@ -14,7 +14,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET" || !event.request.url.startsWith(self.location.origin)) return;
   if (event.request.mode === "navigate") {
-    event.respondWith(fetch(event.request).then((response) => { const copy = response.clone(); caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)); return response; }).catch(() => caches.match(event.request).then((response) => response || caches.match("/"))));
+    event.respondWith(fetch(event.request).then((response) => { if (response.ok) { const copy = response.clone(); caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)); } return response; }).catch(() => caches.match(event.request).then((response) => response || caches.match("/"))));
     return;
   }
   const isCode = event.request.destination === "script" || event.request.destination === "style";
