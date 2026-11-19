@@ -1,0 +1,40 @@
+.quiz-battle {
+  width: min(100% - 2rem, 46rem);
+  margin: 0 auto;
+  padding: 2rem 0 8rem;
+  color: #f1f5f9;
+}
+.quiz-battle a, .quiz-battle h1, .quiz-battle h2 { color: #facc15; }
+.quiz-battle h1, .quiz-battle h2 { margin: 0.35rem 0; }
+.quiz-battle .battle-panel {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.4rem 0;
+  padding: clamp(0.9rem, 4vw, 1.5rem);
+  border: 1px solid #3b4255;
+  border-radius: 1rem;
+  background: #111827;
+}
+.quiz-battle p { margin: 0.3rem 0; }
+.quiz-battle label, .quiz-battle .battle-options { display: grid; gap: 0.4rem; }
+.quiz-battle button, .quiz-battle input {
+  box-sizing: border-box;
+  min-height: 44px;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+}
+.quiz-battle input { color: #fff; background: #020617; border: 1px solid #64748b; }
+.quiz-battle button { color: #1c1600; background: #facc15; border: 1px solid transparent; cursor: pointer; }
+.quiz-battle button:disabled { cursor: default; opacity: 0.62; }
+.quiz-battle :focus-visible { outline: 2px solid #fef08a; outline-offset: 3px; }
+.quiz-battle .battle-row { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 0.55rem; }
+.quiz-battle .battle-error { color: #fda4af; }
+.quiz-battle .battle-scores { list-style: none; padding: 0; display: flex; gap: 0.6rem; margin: 0; }
+.quiz-battle .battle-scores li { flex: 1; min-width: 0; display: grid; gap: 0.25rem; padding: 0.65rem; background: #1e293b; border-radius: 0.5rem; overflow-wrap: anywhere; }
+.quiz-battle .battle-options button { text-align: left; color: #f8fafc; background: #1e293b; border-color: #64748b; }
+.quiz-battle .battle-options button.battle-selected { border-color: #facc15; opacity: 1; }
+.quiz-battle .battle-options button.battle-correct { color: #dcfce7; background: #14532d; border-color: #86efac; opacity: 1; }
+.quiz-battle ol { margin: 0; padding-left: 2rem; }
+.quiz-battle ol li { padding: 0.5rem 0; border-bottom: 1px solid #334155; overflow-wrap: anywhere; }
+.quiz-battle ol strong { float: right; margin-left: 0.5rem; }

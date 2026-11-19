@@ -1,16 +1,19 @@
-.challenge-page {
-  background-color: #0b1b36;
-  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+/* Page wrapper */
+.tictactoe-page {
+  background-color: #050b1a;
+  background-image: radial-gradient(circle at top, #1e3a8a 0, transparent 55%),
+    url("https://www.transparenttextures.com/patterns/stardust.png");
   background-size: cover;
   background-position: center;
   min-height: 100vh;
-  color: white;
-  padding: 20px;
+  color: #f9fafb;
+  padding: 20px 20px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+/* Board view */
 .tic-tac-toe-board {
   display: flex;
   flex-direction: column;
@@ -28,7 +31,7 @@
   width: 80px;
   height: 80px;
   background-color: transparent;
-  border: 2px solid #ffd700;
+  border: 2px solid #facc15;
   font-size: 36px;
   font-weight: bold;
   color: white;
@@ -37,52 +40,153 @@
   align-items: center;
   cursor: pointer;
   border-radius: 12px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.25s ease, transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .cell:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(250, 204, 21, 0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(250, 204, 21, 0.35);
+}
+.cell:disabled { cursor: default; opacity: 1; }
+.cell:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+
+/* ===========================
+   PREMIUM QUESTION CARD (MATCH CHECKERS QUIZ GATE)
+   =========================== */
+
+.tictactoe-question-card {
+  width: 100%;
+  max-width: 540px;
+  background: rgba(15, 23, 42, 0.96);
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.4rem 1.4rem;
+  border: 1px solid rgba(250, 204, 21, 0.8); /* gold outline */
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85);
+  box-sizing: border-box;
+  margin: 10px auto 0;
+  color: #f9fafb;
 }
 
-.challenge-flashcard {
-  background-color: #0b1b36;
-  color: white;
-  padding: 20px;
-  border-radius: 20px;
-  max-width: 400px;
-  margin: 0 auto;
-  text-align: center;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+/* Simple fade-in reused */
+.fade-in {
+  animation: fadeIn 0.35s ease-out;
 }
 
-.answer-button {
-  background-color: #facc15;
-  color: #0b1b36;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin: 10px;
-  font-size: 16px;
-  cursor: pointer;
-  font-weight: bold;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.answer-button.correct {
-  background-color: #22c55e;
-  color: white;
+/* Question header row – match .quiz-card-header */
+.tictactoe-question-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 10px;
+  font-size: 0.78rem;
 }
 
-.answer-button.wrong {
-  background-color: #ef4444;
-  color: white;
+.tictactoe-question-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #9ca3af; /* like .quiz-tag */
 }
 
-.grid-2x2 {
+/* Timer pill – match .quiz-timer-pill */
+.tictactoe-question-timer {
+  min-width: 70px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(250, 204, 21, 0.7);
+  background: radial-gradient(circle at top, rgba(250, 204, 21, 0.2), #111827);
+  color: #facc15;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+/* Question text – match .quiz-question */
+.tictactoe-question-text {
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin: 0.2rem 0 0.8rem;
+  color: #f9fafb;
+  text-align: left;
+}
+
+/* Answer options layout – match .answer-options */
+.tictactoe-answer-options {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tictactoe-answer-options.grid-2x2 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
 }
 
+/* Answer button styling – match .answer-button */
+.tictactoe-answer-button {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: radial-gradient(circle at top left, #020617, #020617 45%, #020617);
+  color: #e5e7eb;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out,
+    border-color 0.12s ease-out,
+    background 0.12s ease-out;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.8);
+}
+
+.tictactoe-answer-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #facc15;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.9);
+}
+
+.tictactoe-answer-button:disabled {
+  cursor: default;
+  opacity: 0.92;
+  box-shadow: none;
+}
+
+/* Selected states – match .answer-button.correct / .answer-button.wrong */
+.tictactoe-answer-button.correct {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  border-color: #bbf7d0;
+  color: #ecfdf5;
+}
+
+.tictactoe-answer-button.wrong {
+  background: linear-gradient(135deg, #b91c1c, #ef4444);
+  border-color: #fecaca;
+  color: #fef2f2;
+}
+
+/* Notify banners (unchanged, shared look) */
 .notify-banner {
   margin: 10px auto;
   padding: 10px 20px;
@@ -91,7 +195,7 @@
   border-radius: 10px;
   text-align: center;
   width: fit-content;
-  animation: fadeIn 0.5s ease-in;
+  animation: fadeInNotify 0.4s ease-in;
 }
 
 .notify-banner.bonus {
@@ -104,11 +208,18 @@
   color: white;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes fadeInNotify {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+/* Timers & labels */
 .timer-label {
   font-size: 24px;
   font-weight: bold;
@@ -119,9 +230,10 @@
 .move-text {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
+/* Streak meter & extra move */
 .streak-meter {
   margin-top: 10px;
   text-align: center;
@@ -137,6 +249,7 @@
   margin-top: 10px;
 }
 
+/* Quit button */
 .back-home-button {
   margin-top: 30px;
   padding: 10px 20px;
@@ -147,4 +260,47 @@
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.25s, transform 0.15s, box-shadow 0.15s;
 }
+
+.back-home-button:hover {
+  background-color: #eab308;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.6);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .board {
+    grid-template-columns: repeat(3, 70px);
+    gap: 8px;
+  }
+
+  .cell {
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+  }
+
+  .tictactoe-question-card {
+    max-width: 360px;
+    padding: 1rem 1rem 1.1rem;
+    border-radius: 1rem;
+  }
+
+  .tictactoe-question-text {
+    font-size: 1.02rem;
+  }
+
+  .tictactoe-answer-options.grid-2x2 {
+    grid-template-columns: 1fr; /* stack like Quiz Gate on very small screens */
+  }
+
+  .tictactoe-answer-button {
+    font-size: 0.86rem;
+    padding: 0.55rem 0.7rem;
+  }
+}
+.tictactoe-controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}.tictactoe-pause-button,.tictactoe-controls .back-home-button{width:148px;height:48px;min-height:48px;margin:0;padding:0 16px;border-radius:999px;font-size:16px;line-height:1;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}.tictactoe-pause-button{border:1px solid rgba(250,204,21,.55);background:rgba(15,23,42,.9);color:#fde68a}.tictactoe-pause-overlay{position:fixed;z-index:150;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;background:rgba(2,6,23,.84);backdrop-filter:blur(9px);text-align:center}.tictactoe-pause-overlay strong{font-size:clamp(1.7rem,6vw,2.5rem);color:#fde68a}.tictactoe-pause-overlay span{color:#cbd5e1}.tictactoe-pause-overlay button{min-height:46px;padding:0 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#fde047,#f59e0b);color:#111827;font-weight:900}
+@media(max-width:360px){.tictactoe-pause-button,.tictactoe-controls .back-home-button{width:132px;font-size:14px}}
+@media(hover:none){.cell:hover,.tictactoe-answer-button:hover:not(:disabled){transform:none;box-shadow:none}}

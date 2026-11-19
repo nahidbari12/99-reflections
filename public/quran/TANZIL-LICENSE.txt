@@ -1,0 +1,14 @@
+Tanzil Quran Text Copyright (C) 2007-2026 Tanzil Project
+License: Creative Commons Attribution 3.0
+
+This copy of the Quran text is carefully produced, highly verified and
+continuously monitored by a group of specialists at Tanzil Project.
+
+The text may be copied and distributed verbatim, but changing the text is not
+allowed. Tanzil Project must be clearly indicated as the source, and a link to
+https://tanzil.net must be provided. This copyright notice must be included in
+all verbatim copies of the text, and in all files derived from or containing a
+substantial portion of this text.
+
+License details: https://creativecommons.org/licenses/by/3.0/
+Tanzil terms: https://tanzil.net/docs/text_license

@@ -2,103 +2,283 @@
 
 .mode-selection-page {
   height: 100vh;
+  min-height: 100dvh; /* ✅ dynamic viewport height on mobile */
   width: 100%;
-  background-color: #0b1b36;
-  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
-  background-size: cover;
-  background-position: center;
+  background-color: #020617;
+  background-image:
+    url("https://www.transparenttextures.com/patterns/stardust.png"),
+    radial-gradient(
+      1200px 600px at 50% -200px,
+      rgba(250, 204, 21, 0.16),
+      transparent
+    );
+  background-size: 320px 320px, auto;
+  background-position: center, top;
+  background-repeat: repeat, no-repeat;
+
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center;  /* center vertically */
+  align-items: center;      /* center horizontally */
+  padding: 1.4rem 1rem;
+  box-sizing: border-box;
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont,
+    sans-serif;
 }
 
+/* Main card */
 .mode-selection-content {
+  width: 100%;
+  max-width: 520px;
   text-align: center;
-  color: #f8e9a1;
-  padding: 20px;
-  background-color: rgba(11, 27, 54, 0.8);
-  border-radius: 12px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+  color: #f9fafb;
+  padding: 1.6rem 1.4rem 1.5rem;
+  background: radial-gradient(circle at top left, #111827, #020617);
+  border-radius: 1.2rem;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(250, 204, 21, 0.6);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Soft decorative glow */
+.mode-selection-content::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(
+    circle at 10% 0%,
+    rgba(250, 204, 21, 0.18),
+    transparent 55%
+  );
+  opacity: 0.8;
+  pointer-events: none;
 }
 
 .mode-selection-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.8rem, 3.5vw, 2.2rem);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #facc15;
+  text-shadow: 1px 1px 3px #000;
 }
 
-.mode-button {
-  display: block;
-  margin: 10px auto;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: bold;
-  background-color: #facc15;
-  color: #0b1b36;
-  border: none;
-  border-radius: 8px;
+.mode-page-nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.mode-page-nav button {
+  min-height: 38px;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(15, 23, 42, 0.88);
+  color: #e5e7eb;
+  font: 700 0.76rem "Poppins", system-ui, sans-serif;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
 }
 
-.mode-button:hover {
-  background-color: #eab308;
-  transform: scale(1.05);
+.mode-page-nav .dashboard-link {
+  color: #fef3c7;
+  border-color: rgba(250, 204, 21, 0.55);
+  background: rgba(120, 88, 20, 0.2);
 }
 
+.mode-page-nav button:hover,
+.mode-page-nav button:focus-visible {
+  color: #facc15;
+  border-color: #facc15;
+}
+
+/* Optional subtle subtitle using existing markup with just text if you add it later */
+/*
+.mode-selection-subtitle {
+  position: relative;
+  z-index: 1;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+  margin-bottom: 1rem;
+}
+*/
+
+/* Buttons */
+.mode-button {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  margin: 0.35rem auto;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease-out,
+    box-shadow 0.16s ease-out,
+    filter 0.16s ease-out,
+    border-color 0.16s ease-out;
+}
+
+/* Default (used for Learn / Challenge / Gamer if no extra class) */
+.mode-button.learn,
+.mode-button.challenge,
+.mode-button.gamer,
+.mode-button {
+  background: linear-gradient(135deg, #facc15, #fbbf24);
+  color: #111827;
+  border-color: #facc15;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* Daily Quiz – slightly different tone */
+.mode-button.daily-quiz {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: #f9fafb;
+  border-color: #60a5fa;
+}
+
+.mode-button.daily-challenge { background: linear-gradient(135deg,#7c3aed,#5b21b6); color:#fff; border-color:#a78bfa; }
+
+/* Difficulty buttons */
 .mode-button.easy {
-  background-color: #3b82f6;
-  color: white;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ecfdf5;
+  border-color: #4ade80;
 }
 
-.mode-button.easy:hover {
-  background-color: #2563eb;
+.mode-button.medium {
+  background: linear-gradient(135deg, #eab308, #ca8a04);
+  color: #111827;
+  border-color: #fde047;
 }
 
 .mode-button.hard {
-  background-color: #ef4444;
-  color: white;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #fef2f2;
+  border-color: #fecaca;
 }
 
-.mode-button.hard:hover {
-  background-color: #dc2626;
+.difficulty-intro {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 0.8rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
 }
 
-.mode-button.multiplayer {
-  background-color: #10b981;
-  color: white;
+.difficulty-choice {
+  border-radius: 16px;
+  text-align: left;
+  padding: 0.75rem 1rem;
 }
 
-.mode-button.multiplayer:hover {
-  background-color: #059669;
+.difficulty-choice span,
+.difficulty-choice small {
+  display: block;
 }
 
+.difficulty-choice span {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.difficulty-choice small {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.82;
+}
+
+/* Hover states */
+.mode-button:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.85);
+}
+
+/* Coming soon multiplayer note */
+.coming-soon-text {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 0.9rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px dashed rgba(148, 163, 184, 0.7);
+}
+
+/* Back button */
 .back-home-button {
-  margin-top: 20px;
-  padding: 10px 20px;
+  position: relative;
+  z-index: 1;
+  margin-top: 1rem;
+  padding: 0.6rem 1.3rem;
   background-color: transparent;
-  color: white;
-  border: 2px solid white;
-  border-radius: 10px;
-  font-weight: bold;
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.8);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .back-home-button:hover {
-  background-color: white;
-  color: #0a1440;
-  transform: translateY(-2px);
+  background-color: rgba(15, 23, 42, 0.95);
+  color: #facc15;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7);
 }
 
+/* Input field (kept for future use) */
 .input-field {
+  position: relative;
+  z-index: 1;
   display: block;
-  margin: 10px auto;
-  padding: 10px 16px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  margin: 0.5rem auto 0.75rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.95rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(148, 163, 184, 0.9);
   width: 80%;
   max-width: 280px;
   text-align: center;
+  background: rgba(15, 23, 42, 0.96);
+  color: #f9fafb;
+}
+
+/* Mobile tweaks */
+@media (max-width: 480px) {
+  .mode-selection-page {
+    padding: 1.2rem 0.9rem;
+  }
+
+  .mode-selection-content {
+    padding: 1.3rem 1.1rem 1.25rem;
+    border-radius: 1.1rem;
+  }
+
+  .mode-button {
+    font-size: 0.92rem;
+  }
+
+  .mode-page-nav button {
+    flex: 1;
+    padding-inline: 0.55rem;
+  }
 }

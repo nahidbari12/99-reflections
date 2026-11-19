@@ -1,0 +1,172 @@
+/* /src/styles/GoldenLetters.css */
+
+.gl-page {
+  min-height: 100vh;
+  background-color: #050b1a;
+  background-image: radial-gradient(circle at top, #1e3a8a 0, transparent 55%),
+    url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  color: #f9fafb;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 12px 40px;
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  overflow-x: hidden;
+}
+
+.gl-inner {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* Header */
+.gl-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.gl-title {
+  font-size: 1.95rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  color: #facc15;
+  text-shadow: 0 0 18px rgba(250, 204, 21, 0.25);
+}
+
+.gl-subtitle {
+  font-size: 0.98rem;
+  opacity: 0.92;
+  margin-top: 4px;
+}
+
+/* Progress */
+.gl-progress {
+  margin-top: 14px;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(250, 204, 21, 0.18);
+  border-radius: 16px;
+  padding: 12px 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.55);
+}
+
+.gl-progress-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  opacity: 0.95;
+  margin-bottom: 8px;
+}
+
+.gl-progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+
+.gl-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #facc15;
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.35);
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+/* CTAs */
+.gl-cta-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.gl-btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 12px 14px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    background-color 0.12s ease, opacity 0.12s ease;
+  user-select: none;
+}
+
+.gl-btn:active {
+  transform: translateY(1px);
+}
+
+.gl-btn-primary {
+  background: #facc15;
+  color: #0a1440;
+  box-shadow: 0 10px 24px rgba(250, 204, 21, 0.18);
+}
+
+.gl-btn-primary:hover {
+  background: #eab308;
+  box-shadow: 0 12px 28px rgba(250, 204, 21, 0.24);
+}
+
+.gl-btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f9fafb;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.gl-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+/* Preview Card */
+.gl-preview-card {
+  margin-top: 14px;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(250, 204, 21, 0.16);
+  border-radius: 18px;
+  padding: 14px 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.55);
+}
+
+.gl-preview-title {
+  font-weight: 800;
+  color: #facc15;
+  margin-bottom: 8px;
+  letter-spacing: 0.2px;
+}
+
+.gl-preview-list {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.7;
+  opacity: 0.95;
+}
+
+.gl-preview-list li {
+  margin: 4px 0;
+}
+
+/* Mobile tweaks */
+@media (max-width: 480px) {
+  .gl-title {
+    font-size: 1.7rem;
+  }
+
+  .gl-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .gl-cta-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .gl-btn {
+    width: 100%;
+  }
+}

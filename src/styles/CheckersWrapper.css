@@ -1,0 +1,509 @@
+/* CheckersWrapper.css */
+/* 99 Reflections – Checkers Styling */
+
+.checkers-wrapper {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+  padding: 1rem;
+  color: #e5e7eb;
+  /* ⭐ Dark space + stars behind the board */
+  background-color: #0b1220;
+  background-image:
+    url("https://www.transparenttextures.com/patterns/stardust.png"),
+    radial-gradient(
+      1200px 600px at 50% -200px,
+      rgba(250, 204, 21, 0.08),
+      transparent
+    );
+  background-size: 300px 300px, auto;
+  background-repeat: repeat, no-repeat;
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
+
+  /* Responsive layout */
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* ---------- Top Bar ---------- */
+.cw-topbar {
+  width: 100%;
+  max-width: 920px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto;
+
+  padding: 0.6rem 0.3rem;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(250, 204, 21, 0.25);
+  border-radius: 0 0 0.8rem 0.8rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.cw-titles {
+  display: grid;
+}
+
+.arabic-calligraphy {
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
+.game-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #facc15;
+}
+
+.cw-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cw-difficulty { display: flex; align-items: center; gap: .45rem; color: #f4cf65; font-weight: 700; }
+.cw-difficulty select { min-height: 40px; border: 1px solid rgba(244,207,101,.55); border-radius: 10px; padding: .45rem .65rem; background: #101a31; color: #fff; font: inherit; }
+.cw-difficulty select:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+
+/* Timer – now with glow & low-time state */
+.cw-timer {
+  background: #0f172a;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  color: #facc15;
+  font-weight: 600;
+  box-shadow: inset 0 0 8px rgba(250, 204, 21, 0.35);
+  transition: box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.cw-timer.low {
+  box-shadow: inset 0 0 10px rgba(248, 113, 113, 0.7);
+  color: #fecaca;
+}
+
+.btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.75rem;
+  background: #111827;
+  border: 1px solid #374151;
+  color: #e5e7eb;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.btn.quit {
+  border-color: #b91c1c;
+}
+
+/* ---------- Banner ---------- */
+.cw-banner {
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  color: #facc15;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+}
+
+/* ---------- Board ---------- */
+.cw-board {
+  width: 100%;
+  max-width: 720px;
+  aspect-ratio: 1/1;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  border-radius: 1rem;
+  overflow: hidden;
+
+  /* Gold outline */
+  border: 4px solid #facc15;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Subtle animated glow behind the board */
+.cw-board::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 1.3rem;
+  background: radial-gradient(
+    circle at center,
+    rgba(250, 204, 21, 0.18),
+    transparent 70%
+  );
+  z-index: -1;
+  animation: boardGlow 4s infinite ease-in-out alternate;
+}
+
+@keyframes boardGlow {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 0.75;
+  }
+}
+
+.cw-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.cw-cell {
+  position: relative;
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  cursor: pointer;
+}
+.cw-cell:disabled { cursor: default; opacity: 1; }
+.cw-cell:focus-visible { outline: 3px solid #38bdf8; outline-offset: -3px; z-index: 2; }
+
+.cw-cell.light {
+  background: #203040;
+}
+
+.cw-cell.dark {
+  background: #102030;
+}
+
+.cw-cell.selected::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(52, 199, 89, 0.22);
+}
+
+.cw-cell.dest::after {
+  content: "";
+  position: absolute;
+  width: 22%;
+  height: 22%;
+  left: 39%;
+  top: 39%;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* ========================================================= */
+/* ---------- PIECES: Strong 3D Realistic Wood ------------- */
+/* ========================================================= */
+
+.piece {
+  width: 72%;
+  height: 72%;
+  margin: 14%;
+  border-radius: 50%;
+  position: relative;
+
+  /* Strong 3D shadow + rim */
+  box-shadow:
+    0 8px 14px rgba(0, 0, 0, 0.85),
+    inset 0 4px 4px rgba(255, 255, 255, 0.35),
+    inset 0 -5px 9px rgba(0, 0, 0, 0.8);
+
+  transform: translateY(-2px);
+  transition: transform 0.22s cubic-bezier(0.25, 1.4, 0.4, 1);
+}
+
+/* Light wooden player piece (polished maple) */
+.piece.red {
+  background:
+    radial-gradient(
+      circle at 25% 18%,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(255, 255, 255, 0) 55%
+    ),
+    repeating-radial-gradient(
+      circle at 50% 55%,
+      rgba(0, 0, 0, 0.16) 0 2px,
+      rgba(0, 0, 0, 0) 2px 4px
+    ),
+    conic-gradient(
+      from 0deg,
+      #f8e3ac,
+      #e8c572,
+      #d29241,
+      #b56b25,
+      #d29241,
+      #e8c572,
+      #f8e3ac
+    );
+  border: 2px solid #7b4b18;
+}
+
+.piece.red::before {
+  content: "";
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 3px 4px rgba(255, 255, 255, 0.22),
+    inset 0 -4px 7px rgba(0, 0, 0, 0.65);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.16) 0 2px,
+      rgba(0, 0, 0, 0.2) 2px 5px
+    );
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Dark wooden CPU piece (deep walnut) */
+.piece.black {
+  background:
+    radial-gradient(
+      circle at 25% 18%,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0) 55%
+    ),
+    repeating-radial-gradient(
+      circle at 50% 55%,
+      rgba(0, 0, 0, 0.3) 0 2px,
+      rgba(0, 0, 0, 0) 2px 4px
+    ),
+    conic-gradient(
+      from 0deg,
+      #5a3420,
+      #452417,
+      #2f180f,
+      #1b0d08,
+      #2f180f,
+      #452417,
+      #5a3420
+    );
+  border: 2px solid #281509;
+}
+
+.piece.black::before {
+  content: "";
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 3px 4px rgba(255, 255, 255, 0.16),
+    inset 0 -4px 7px rgba(0, 0, 0, 0.85);
+  background:
+    repeating-linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.08) 0 2px,
+      rgba(0, 0, 0, 0.28) 2px 5px
+    );
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* ========================================================= */
+/* ---------- KING PIECES (Crown Enlarged to 65%) ---------- */
+/* ========================================================= */
+
+.piece.king {
+  border: 3px solid #facc15;
+  box-shadow:
+    0 9px 16px rgba(0, 0, 0, 0.95),
+    inset 0 0 6px rgba(255, 255, 255, 0.36);
+  animation: kingBurst 0.25s ease-out;
+}
+
+.piece.red.king::after,
+.piece.black.king::after {
+  content: "";
+  position: absolute;
+
+  /* Crown now 65% instead of 50% */
+  width: 65%;
+  height: 65%;
+
+  /* Adjusted for perfect centering */
+  left: 17.5%;
+  top: 17%;
+
+  background-image: url("../assets/CheckersCrown.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  pointer-events: none;
+}
+
+@keyframes kingBurst {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ---------- Turn Chip ---------- */
+.cw-turn-chip {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #facc15;
+  color: #facc15;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(250, 204, 21, 0.25);
+}
+
+/* ---------- Info Bar ---------- */
+.cw-infobar {
+  width: 100%;
+  max-width: 920px;
+  display: flex;
+  justify-content: space-between;
+  color: #cbd5e1;
+  margin-top: 0.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 0.5rem;
+}
+
+.cw-infobar > div {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  font-size: 0.8rem;
+}
+
+/* Premium must-jump badge */
+.must-jump {
+  margin-top: 0.0rem;
+  padding: 0.3rem 0.7rem;
+  color: #facc15;
+  border: 1px solid #facc15;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: rgba(250, 204, 21, 0.12);
+  animation: glowPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 4px rgba(250, 204, 21, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+  }
+}
+
+/* ---------- Modal ---------- */
+.cw-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.65);
+  display: grid;
+  place-items: center;
+  z-index: 40;
+}
+
+.cw-modal {
+  width: min(92vw, 560px);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(250, 204, 21, 0.7);
+  border-radius: 1.2rem;
+  padding: 1.4rem 1.6rem;
+  color: #e5e7eb;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75);
+  animation: modalPop 0.25s ease-out;
+}
+
+@keyframes modalPop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cw-modal h3 {
+  font-size: 1.7rem;
+  color: #facc15;
+  margin-bottom: 0.35rem;
+  text-shadow: 1px 1px 4px #000;
+}
+
+.cw-modal-sub {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  margin-bottom: 0.9rem;
+}
+
+.cw-summary {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 1rem;
+  color: #cbd5e1;
+}
+
+.cw-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+/* ---------- Mobile Optimizations ---------- */
+@media (max-width: 640px) {
+  .checkers-wrapper {
+    padding-top: 0.8rem;
+    padding-bottom: 1.2rem;
+  }
+
+  .cw-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    border-radius: 0.8rem;
+  }
+
+  .cw-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .cw-infobar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cw-board {
+    max-width: 100%;
+    border-width: 3px;
+  }
+
+  .game-title {
+    font-size: 1.5rem;
+  }
+}

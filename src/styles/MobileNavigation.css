@@ -1,0 +1,9 @@
+.mobile-app-nav,.mobile-nav-space{display:none}
+@media(max-width:700px){
+  /* Reserve room for both the fixed nav and the music control docked above it. */
+  .mobile-nav-space{display:block;height:148px;flex:0 0 148px}
+  .mobile-app-nav{position:fixed;z-index:100;left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));display:flex;justify-content:space-around;padding:6px;background:rgba(5,22,32,.96);border:1px solid rgba(227,184,90,.24);border-radius:18px;box-shadow:0 14px 45px rgba(0,0,0,.55);backdrop-filter:blur(18px)}
+  .mobile-app-nav button{min-width:0;flex:1;border:0;border-radius:12px;background:transparent;color:#80979c;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+  .mobile-app-nav button span{font-size:19px;line-height:1.1}.mobile-app-nav button small{font-size:10px}.mobile-app-nav button.active{color:#f4cd72;background:rgba(227,184,90,.1)}
+  .journey-nav{display:none!important}
+}

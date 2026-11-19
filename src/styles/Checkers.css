@@ -1,0 +1,101 @@
+/* /src/styles/Checkers.css */
+
+.checkers-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: #0b1a2b; /* Dark starry night background */
+  min-height: 100vh;
+  color: #facc15; /* Gold text for headers */
+  font-family: 'Poppins', sans-serif;
+}
+
+.arabic-calligraphy {
+  font-family: 'Scheherazade', serif;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  color: #facc15;
+}
+
+.checkers-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #facc15;
+}
+
+.checkers-board {
+  display: grid;
+  grid-template-columns: repeat(8, 60px);
+  grid-template-rows: repeat(8, 60px);
+  gap: 2px;
+  border: 2px solid #facc15;
+  background-color: #203040;
+}
+
+.checkers-cell {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkers-cell.light {
+  background-color: #c0c0c0;
+}
+
+.checkers-cell.dark {
+  background-color: #102030;
+}
+
+.checkers-piece {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #facc15;
+}
+
+.checkers-piece.red {
+  background-color: #dc2626;
+}
+
+.checkers-piece.black {
+  background-color: #000000;
+}
+
+/* Quiz Blocked Message */
+.quiz-blocked-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px 20px;
+  border-radius: 12px;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.quiz-blocked-message p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: #facc15;
+}
+
+.go-to-quiz-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  color: #0b1a2b;
+  background-color: #facc15;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.go-to-quiz-button:hover {
+  background-color: #ffd700;
+  transform: scale(1.05);
+}

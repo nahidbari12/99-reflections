@@ -1,0 +1,222 @@
+.chess-results-card {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 1.9rem;
+  border-radius: 1.5rem;
+  background: radial-gradient(circle at top right, rgba(15, 23, 42, 0.96), #020617);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  box-shadow:
+    0 24px 48px rgba(15, 23, 42, 0.95),
+    0 0 0 1px rgba(15, 23, 42, 1);
+  box-sizing: border-box;
+}
+
+.chess-results-card.fade-in {
+  animation: chessResultsFade 0.45s ease-out;
+}
+
+@keyframes chessResultsFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Outcome banner */
+
+.results-outcome-banner {
+  text-align: center;
+  margin-bottom: 1.4rem;
+}
+
+.results-headline {
+  font-size: 1.6rem;
+  margin-bottom: 0.35rem;
+  color: #facc15;
+}
+
+.results-subtext {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+/* Stats grid */
+
+.results-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.4rem;
+}
+
+.results-stat-card {
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.9rem;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.7);
+  text-align: center;
+}
+
+.results-stat-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+}
+
+.results-stat-value {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.results-stat-value.success {
+  color: #4ade80;
+}
+
+.results-stat-value.danger {
+  color: #f97373;
+}
+
+.results-streak-hearts {
+  font-size: 0.95rem;
+}
+
+.results-stat-pill {
+  margin-top: 0.35rem;
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+}
+
+.results-pill-neutral {
+  background: rgba(31, 41, 55, 0.9);
+  color: #9ca3af;
+}
+
+.results-pill-success {
+  background: rgba(22, 163, 74, 0.2);
+  color: #bbf7d0;
+}
+
+.results-pill-danger {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+}
+
+/* Review panel */
+
+.results-review-panel {
+  margin-bottom: 1.4rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(55, 65, 81, 0.85);
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.results-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.results-review-title {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #9ca3af;
+}
+
+.results-review-count {
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.results-review-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.results-review-item + .results-review-item {
+  margin-top: 0.55rem;
+  border-top: 1px dashed rgba(55, 65, 81, 0.7);
+  padding-top: 0.55rem;
+}
+
+.results-review-prompt {
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+.results-review-correct {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.results-review-correct span {
+  color: #facc15;
+}
+
+/* Empty state */
+
+.results-empty-message {
+  text-align: center;
+  color: #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+/* Actions */
+
+.results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.results-primary-button {
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(250, 204, 21, 0.85);
+  background: radial-gradient(circle at top, rgba(250, 204, 21, 0.25), #111827);
+  color: #fefce8;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    transform 0.1s ease-out;
+}
+
+.results-primary-button:hover {
+  background: rgba(250, 204, 21, 0.2);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.95);
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+
+@media (max-width: 640px) {
+  .chess-results-card {
+    padding: 1.4rem 1.1rem 1.6rem;
+    border-radius: 1.25rem;
+  }
+
+  .results-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

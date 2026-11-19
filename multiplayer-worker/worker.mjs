@@ -1,0 +1,308 @@
+import { DurableObject } from "cloudflare:workers";
+import names from "../src/data/names.jsx";
+
+const QUESTION_MS = 15000;
+const REVEAL_MS = 2400;
+const ROOM_TTL = 30 * 60 * 1000;
+const ROUNDS = 10;
+const json = (data, status = 200, headers = {}) => Response.json(data, { status, headers });
+const rankings = env => env.RANKINGS.getByName("global");
+const validToken = token => typeof token === "string" && /^[a-f0-9]{64}$/.test(token);
+
+async function playerId(token) {
+  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+  return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function shuffled(items) {
+  const result = [...items];
+  const random = crypto.getRandomValues(new Uint32Array(result.length));
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = random[i] % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function questions() {
+  const meanings = [...new Set(names.map(name => name.meaning))];
+  return shuffled(names).slice(0, ROUNDS).map(({ arabic, name, meaning }) => {
+    const options = shuffled([meaning, ...shuffled(meanings.filter(item => item !== meaning)).slice(0, 3)]);
+    return { arabic, name, options, correct: options.indexOf(meaning) };
+  });
+}
+
+export default {
+  async fetch(request, env) {
+    const path = new URL(request.url).pathname;
+    const origin = request.headers.get("Origin");
+    if (path === "/health" && request.method === "GET" && !origin) {
+      return json({ service: "99 Reflections multiplayer", ready: true });
+    }
+    if (!env.ALLOWED_ORIGINS.split(",").includes(origin)) return json({ error: "Origin not allowed." }, 403);
+    const cors = {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Cache-Control": "no-store",
+      Vary: "Origin",
+    };
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+    if (path === "/health" && request.method === "GET") {
+      return json({ service: "99 Reflections multiplayer", ready: true }, 200, cors);
+    }
+    if (path === "/leaderboard" && request.method === "GET") {
+      return json({ players: await rankings(env).top() }, 200, cors);
+    }
+    if (path === "/profile" && request.method === "POST") {
+      let body;
+      try {
+        const raw = await request.text();
+        if (raw.length > 512) return json({ error: "Request too large." }, 413, cors);
+        body = JSON.parse(raw);
+      } catch {
+        return json({ error: "Invalid profile." }, 400, cors);
+      }
+      const username = typeof body?.username === "string" ? body.username.trim().normalize("NFKC") : "";
+      if (!validToken(body?.token) || !/^\p{L}[\p{L}\p{N}_-]{2,19}$/u.test(username)) {
+        return json({ error: "Use 3–20 letters, numbers, underscores or hyphens. Start with a letter." }, 400, cors);
+      }
+      const result = await rankings(env).register(await playerId(body.token), username);
+      return json(result, result.error ? 409 : 200, cors);
+    }
+    const room = /^\/rooms\/([A-F0-9]{10})\/(create|join)$/.exec(path);
+    if (room && request.headers.get("Upgrade")?.toLowerCase() === "websocket") {
+      return env.ROOMS.getByName(room[1]).fetch(request);
+    }
+    return json({ error: "Not found." }, 404, cors);
+  },
+};
+
+export class Leaderboard extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.sql = ctx.storage.sql;
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS profiles (
+      id TEXT PRIMARY KEY, username TEXT NOT NULL, normalized TEXT UNIQUE NOT NULL,
+      best INTEGER NOT NULL DEFAULT 0, played INTEGER NOT NULL DEFAULT 0
+    )`);
+    this.sql.exec("CREATE TABLE IF NOT EXISTS matches (id TEXT PRIMARY KEY, recorded INTEGER NOT NULL)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS ranking ON profiles(best DESC, normalized)");
+  }
+
+  register(id, username) {
+    const profile = this.profile(id);
+    if (profile) return profile;
+    const normalized = username.toLowerCase().normalize("NFKC");
+    const added = this.sql.exec(
+      "INSERT OR IGNORE INTO profiles(id, username, normalized) VALUES (?, ?, ?) RETURNING username",
+      id, username, normalized
+    ).toArray()[0];
+    return added ?? { error: "That username is taken. Try another." };
+  }
+
+  profile(id) {
+    return this.sql.exec("SELECT username FROM profiles WHERE id = ?", id).toArray()[0] ?? null;
+  }
+
+  top() {
+    return this.sql.exec(`SELECT username, best FROM profiles
+      WHERE played > 0 ORDER BY best DESC, normalized ASC LIMIT 50`).toArray();
+  }
+
+  record(id, players) {
+    this.ctx.storage.transactionSync(() => {
+      const added = this.sql.exec(
+        "INSERT OR IGNORE INTO matches VALUES (?, ?) RETURNING id", id, Date.now()
+      ).toArray().length;
+      if (!added) return;
+      for (const player of players) {
+        this.sql.exec("UPDATE profiles SET best = MAX(best, ?), played = played + 1 WHERE id = ?",
+          player.score, player.id);
+      }
+      this.sql.exec("DELETE FROM matches WHERE recorded < ?", Date.now() - 2 * ROOM_TTL);
+    });
+  }
+}
+
+export class BattleRoom extends DurableObject {
+  async fetch(request) {
+    if (this.ctx.getWebSockets().length >= 8) return new Response("Room busy", { status: 429 });
+    const [, , code, mode] = new URL(request.url).pathname.split("/");
+    const [client, server] = Object.values(new WebSocketPair());
+    this.ctx.acceptWebSocket(server);
+    server.serializeAttachment({ code, mode, opened: Date.now() });
+    await this.ctx.storage.setAlarm(await this.nextAlarm(await this.ctx.storage.get("room")));
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  nextAlarm(room) {
+    const pending = this.ctx.getWebSockets().filter(ws => ws.readyState === 1 && !ws.deserializeAttachment()?.id)
+      .map(ws => ws.deserializeAttachment().opened + 10000);
+    return Math.min(room?.deadline ?? Infinity, room?.expires ?? Infinity,
+      room?.unrecorded ? Date.now() + 1000 : Infinity, ...pending, Date.now() + ROOM_TTL);
+  }
+
+  connected(id) {
+    return this.ctx.getWebSockets().some(ws => ws.readyState === 1 && ws.deserializeAttachment()?.id === id);
+  }
+
+  broadcast(room) {
+    const question = room.questions?.[room.index];
+    const visible = question && ["question", "reveal"].includes(room.phase);
+    const players = room.players.map(({ id, username, score, answer, ready }) => ({
+      username, score, answered: answer !== null, ready, connected: this.connected(id),
+    }));
+    for (const ws of this.ctx.getWebSockets()) {
+      const you = room.players.findIndex(player => player.id === ws.deserializeAttachment()?.id);
+      if (you === -1 || ws.readyState !== 1) continue;
+      try {
+        ws.send(JSON.stringify({
+          type: "state", code: room.code, phase: room.phase, players, you, total: ROUNDS,
+          number: room.index + 1, match: room.match, remaining: room.deadline ? Math.max(0, room.deadline - Date.now()) : 0,
+          question: visible ? {
+            arabic: question.arabic, name: question.name, options: question.options,
+            correct: room.phase === "reveal" ? question.correct : null,
+          } : null,
+          answer: room.players[you].answer, rankingPending: !!room.unrecorded,
+        }));
+      } catch {
+        ws.close(1011, "Connection interrupted");
+      }
+    }
+  }
+
+  start(room) {
+    room.match = crypto.randomUUID();
+    room.questions = questions();
+    room.index = 0;
+    room.phase = "question";
+    room.deadline = Date.now() + QUESTION_MS;
+    for (const player of room.players) Object.assign(player, { score: 0, answer: null, ready: false });
+  }
+
+  reveal(room) {
+    for (const player of room.players) {
+      if (player.answer === room.questions[room.index].correct) player.score++;
+    }
+    room.phase = "reveal";
+    room.deadline = Date.now() + REVEAL_MS;
+  }
+
+  async save(room) {
+    await this.ctx.storage.put("room", room);
+    await this.ctx.storage.setAlarm(this.nextAlarm(room));
+    this.broadcast(room);
+  }
+
+  async webSocketMessage(ws, raw) {
+    if (typeof raw !== "string" || raw.length > 512) return ws.close(1008, "Invalid message");
+    let message;
+    try { message = JSON.parse(raw); } catch { return ws.close(1008, "Invalid message"); }
+    if (!message || typeof message !== "object") return;
+    const socket = ws.deserializeAttachment();
+    if (!socket.id) {
+      if (message.type !== "hello" || !validToken(message.token)) return ws.close(1008, "Invalid player");
+      socket.id = await playerId(message.token);
+      const profile = await rankings(this.env).profile(socket.id);
+      if (!profile) return ws.close(1008, "Choose a username first.");
+      return this.ctx.blockConcurrencyWhile(async () => {
+        if (ws.readyState !== 1 || ws.deserializeAttachment()?.id) return;
+        let room = await this.ctx.storage.get("room");
+        if (room?.expires <= Date.now()) return ws.close(1008, "Room expired. Create a new room.");
+        if (!room && socket.mode === "create") {
+          room = { code: socket.code, phase: "lobby", players: [], index: -1, expires: Date.now() + ROOM_TTL };
+        }
+        if (!room) return ws.close(1008, "Room not found. Check the code.");
+        const existing = room.players.some(player => player.id === socket.id);
+        if (socket.mode === "create" && room.players.length && !existing) return ws.close(1008, "Code already used. Create another room.");
+        if (!existing && (room.phase !== "lobby" || room.players.length >= 2)) {
+          return ws.close(1008, "Room is full.");
+        }
+        if (!existing) room.players.push({ id: socket.id, username: profile.username, score: 0, answer: null, ready: false });
+        for (const other of this.ctx.getWebSockets()) {
+          if (other !== ws && other.deserializeAttachment()?.id === socket.id) other.close(4001, "Room opened on another tab");
+        }
+        ws.serializeAttachment(socket);
+        await this.save(room);
+      });
+    }
+
+    await this.ctx.blockConcurrencyWhile(async () => {
+      const room = await this.ctx.storage.get("room");
+      const player = room?.players.find(item => item.id === socket.id);
+      if (!player || ws.readyState !== 1 || room.expires <= Date.now()) return;
+      const bothConnected = room.players.length === 2 && room.players.every(item => this.connected(item.id));
+      if (message.type === "start" && room.phase === "lobby" && player === room.players[0] && bothConnected) {
+        this.start(room);
+      } else if (message.type === "answer" && room.phase === "question" && Date.now() < room.deadline &&
+        message.match === room.match && message.number === room.index + 1 && player.answer === null &&
+        Number.isInteger(message.choice) && message.choice >= 0 && message.choice < 4) {
+        player.answer = message.choice;
+        if (room.players.every(item => item.answer !== null)) this.reveal(room);
+      } else if (message.type === "rematch" && room.phase === "finished" && !room.unrecorded && bothConnected) {
+        player.ready = true;
+        if (room.players.every(item => item.ready)) this.start(room);
+      } else {
+        return;
+      }
+      room.expires = Date.now() + ROOM_TTL;
+      await this.save(room);
+    });
+  }
+
+  webSocketClose() {
+    return this.ctx.blockConcurrencyWhile(async () => {
+      const room = await this.ctx.storage.get("room");
+      if (room) this.broadcast(room);
+    });
+  }
+
+  webSocketError(ws) {
+    if (ws.readyState === 1) ws.close(1011, "Connection interrupted");
+  }
+
+  alarm() {
+    return this.ctx.blockConcurrencyWhile(async () => {
+      const now = Date.now();
+      for (const ws of this.ctx.getWebSockets()) {
+        const socket = ws.deserializeAttachment();
+        if (!socket.id && socket.opened + 10000 <= now) ws.close(1008, "Player timed out");
+      }
+      const room = await this.ctx.storage.get("room");
+      if (!room || room.expires <= now) {
+        if (room) {
+          for (const ws of this.ctx.getWebSockets()) ws.close(1008, "Room expired.");
+          await this.ctx.storage.delete("room");
+        }
+        const pending = this.ctx.getWebSockets().some(ws => ws.readyState === 1 && !ws.deserializeAttachment()?.id);
+        if (pending) await this.ctx.storage.setAlarm(this.nextAlarm());
+        return;
+      }
+      if (room.deadline && room.deadline <= now) {
+        if (room.phase === "question") {
+          this.reveal(room);
+        } else if (room.index + 1 < ROUNDS) {
+          room.index++;
+          room.phase = "question";
+          room.deadline = now + QUESTION_MS;
+          for (const player of room.players) player.answer = null;
+        } else {
+          room.phase = "finished";
+          room.deadline = null;
+          room.unrecorded = true;
+        }
+        await this.save(room);
+      }
+      if (room.unrecorded) {
+        try {
+          await rankings(this.env).record(room.match, room.players);
+          room.unrecorded = false;
+        } catch {
+          // The alarm retries the same match ID, so a retried write cannot count twice.
+        }
+      }
+      await this.save(room);
+    });
+  }
+}

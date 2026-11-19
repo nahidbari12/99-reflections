@@ -1,0 +1,144 @@
+/* src/styles/LudoBoard.css */
+
+.ludo-container {
+  background-color: #0b1b36;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.board-title {
+  color: #facc15;
+  margin-bottom: 20px;
+}
+
+.ludo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 150px);
+  grid-template-rows: repeat(3, 150px);
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.home {
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.yellow-home {
+  background-color: #facc15;
+}
+
+.blue-home {
+  background-color: #3b82f6;
+}
+
+.green-home {
+  background-color: #10b981;
+}
+
+.red-home {
+  background-color: #ef4444;
+}
+
+.path {
+  display: grid;
+}
+
+.vertical-path {
+  grid-template-rows: repeat(6, 1fr);
+  width: 40px;
+  height: 150px;
+  justify-self: center;
+}
+
+.horizontal-path {
+  grid-template-columns: repeat(6, 1fr);
+  height: 40px;
+  width: 150px;
+  align-self: center;
+}
+
+.cell {
+  border: 1px solid white;
+  background-color: #1e293b;
+}
+
+.red-track {
+  background-color: #ef4444;
+}
+
+.green-track {
+  background-color: #10b981;
+}
+
+.blue-track {
+  background-color: #3b82f6;
+}
+
+.yellow-track {
+  background-color: #facc15;
+}
+
+.center-cell {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  background: #1e293b;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: stretch;
+  justify-content: stretch;
+}
+
+.center-triangle {
+  width: 50%;
+  height: 50%;
+  clip-path: polygon(50% 50%, 100% 0, 100% 100%);
+}
+
+.center-triangle.red {
+  background-color: #ef4444;
+  clip-path: polygon(50% 50%, 100% 0, 100% 100%);
+}
+
+.center-triangle.green {
+  background-color: #10b981;
+  clip-path: polygon(50% 50%, 0 0, 100% 0);
+}
+
+.center-triangle.yellow {
+  background-color: #facc15;
+  clip-path: polygon(50% 50%, 0 100%, 0 0);
+}
+
+.center-triangle.blue {
+  background-color: #3b82f6;
+  clip-path: polygon(50% 50%, 0 100%, 100% 100%);
+}
+
+.quit-button {
+  margin-top: 30px;
+  padding: 12px 24px;
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.quit-button:hover {
+  background-color: white;
+  color: #0a1440;
+}

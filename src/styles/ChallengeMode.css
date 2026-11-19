@@ -1,22 +1,67 @@
 /* /src/styles/ChallengeMode.css */
 
 .challenge-page {
-  background-color: #0b1b36;
-  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-color: #050b1a;
+  background-image: radial-gradient(circle at top, #1e3a8a 0, transparent 55%),
+    url("https://www.transparenttextures.com/patterns/stardust.png");
   background-size: cover;
   background-position: center;
   min-height: 100vh;
-  color: white;
-  padding: 20px;
+  color: #f9fafb;
+  padding: 20px 20px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.fade-out {
+/* Fade-out transition */
+.challenge-page.fade-out {
   opacity: 0;
-  transition: opacity 0.5s ease-out;
+  transform: scale(0.97);
+  filter: blur(2px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out,
+    filter 0.5s ease-out;
+  pointer-events: none;
 }
+
+/* Gold shimmer sweep */
+.challenge-page.fade-out::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgba(250, 204, 21, 0) 0%,
+    rgba(250, 204, 21, 0.35) 40%,
+    rgba(250, 250, 200, 0.6) 50%,
+    rgba(250, 204, 21, 0.35) 60%,
+    rgba(250, 204, 21, 0) 100%
+  );
+  opacity: 0;
+  animation: shimmerSweep 0.5s ease-out forwards;
+}
+
+@keyframes shimmerSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-40%) skewX(-10deg);
+  }
+  40% {
+    opacity: 0.7;
+    transform: translateX(0) skewX(-10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(40%) skewX(-10deg);
+  }
+}
+
+/* ---------------------- */
+/* TOP BAR */
+/* ---------------------- */
 
 .top-bar {
   width: 100%;
@@ -24,44 +69,190 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background-color: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
-.timer {
-  font-size: 20px;
+.top-bar-left,
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.score-streak {
-  text-align: right;
-}
-
+.timer-chip,
+.difficulty-chip,
 .score-box,
-.streak-text {
-  font-weight: bold;
-  font-size: 16px;
+.streak-pill {
+  font-size: 13px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
+
+.timer-chip {
+  background-color: rgba(248, 250, 252, 0.05);
+}
+
+.timer-chip span {
+  font-weight: 600;
+}
+
+.difficulty-chip {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #fde68a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
+
+.difficulty-chip.easy { color: #86efac; }
+.difficulty-chip.medium { color: #fde047; }
+.difficulty-chip.hard { color: #fca5a5; }
+
+.score-box {
+  background-color: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(250, 204, 21, 0.4);
+}
+
+.score-box span {
+  font-weight: 700;
+}
+
+.streak-pill {
+  background-color: rgba(248, 250, 252, 0.06);
+}
+
+.pause-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  background: rgba(15, 23, 42, 0.85);
+  color: #fde047;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.pause-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.challenge-instruction {
+  margin: 0 0 10px;
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ---------------------- */
+/* CHALLENGE CARD */
+/* ---------------------- */
 
 .challenge-flashcard {
-  background-color: #f9f9f9;
-  color: #0a1440;
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
+  background: radial-gradient(circle at top left, #ffffff, #f7f3e7);
+  color: #000000;
   width: 300px;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-  margin-bottom: 30px;
+  max-width: 90%;
+  padding: 22px 18px 16px;
+  border-radius: 24px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.8);
+  margin-bottom: 26px;
   position: relative;
+  border: 1px solid rgba(250, 204, 21, 0.4);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 190px;
+
+  /* make sure overlays inside are not clipped */
+  overflow: visible;
 }
 
+/* Middle content zone — CENTERED text */
+.challenge-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px 2px;
+  transform: translateY(4px);
+}
+
+.challenge-text {
+  text-align: center;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+  color: #000000;
+}
+
+.challenge-text.arabic-prompt {
+  font-family: "Noto Naskh Arabic", "Amiri", serif;
+  font-size: 38px;
+  line-height: 1.8;
+}
+
+/* Footer row bottom */
+.card-footer-row {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Q1 / Q2 CHIP — WITH GOLD DOT + FADE ANIMATION */
+.question-chip {
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  font-weight: 700;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  position: relative;
+  animation: chipFade 0.35s ease;
+}
+
+.question-chip::before {
+  content: "•";
+  color: #facc15;
+  margin-right: 6px;
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+@keyframes chipFade {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------- */
+/* CIRCLE TIMER */
+/* ---------------------- */
+
 .circle-timer {
-  margin: 10px auto 0;
+  position: relative;
   width: 40px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .timer-svg {
-  width: 100%;
-  height: 100%;
+  width: 40px;
+  height: 40px;
   transform: rotate(-90deg);
 }
 
@@ -79,17 +270,39 @@
   transition: stroke-dashoffset 1s linear;
 }
 
+/* GOLD NUMBER INSIDE THE CIRCLE */
+.card-time-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  font-weight: 700;
+  color: #facc15;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  pointer-events: none;
+}
+
+/* ---------------------- */
+/* BONUS BANNER */
+/* ---------------------- */
+
 .bonus-banner {
   position: absolute;
-  top: -20px;
+
+  /* <<< moved fully inside the card so the whole pill is visible >>> */
+  top: 6px;
+
   left: 50%;
   transform: translateX(-50%);
   background-color: #facc15;
   color: #0a1440;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-weight: bold;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
   animation: fadePop 0.3s ease;
+  z-index: 5;
 }
 
 @keyframes fadePop {
@@ -98,12 +311,16 @@
   100% { transform: translateX(-50%) scale(1); }
 }
 
+/* ---------------------- */
+/* ANSWERS */
+/* ---------------------- */
+
 .answer-options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   width: 90%;
-  max-width: 300px;
+  max-width: 320px;
   margin-bottom: 20px;
 }
 
@@ -114,121 +331,214 @@
 }
 
 .answer-button {
-  padding: 10px 16px;
+  padding: 12px 16px;
   background-color: #facc15;
   color: #0a1440;
   border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  font-size: 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: background-color 0.2s, transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 6px 18px rgba(250, 204, 21, 0.35);
 }
 
-.answer-button:hover {
+.answer-button:hover:not(:disabled) {
   background-color: #eab308;
-  transform: scale(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(250, 204, 21, 0.45);
 }
 
 .answer-button.correct {
-  background-color: #4ade80;
-  color: white;
+  background-color: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 8px 22px rgba(34, 197, 94, 0.5);
 }
 
 .answer-button.wrong {
   background-color: #f87171;
-  color: white;
+  color: #ffffff;
+  box-shadow: 0 8px 22px rgba(248, 113, 113, 0.5);
 }
 
-/* Shared Buttons */
-.gold-button {
-  background-color: #facc15;
+.challenge-feedback {
+  min-height: 44px;
+  max-width: 340px;
+  margin: -6px 0 4px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+.challenge-feedback strong {
+  font-size: 15px;
+}
+
+.feedback-correct { color: #86efac; }
+.feedback-wrong { color: #fca5a5; }
+
+.challenge-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 6, 23, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.challenge-overlay > div {
+  min-width: min(300px, 90vw);
+  padding: 28px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(250, 204, 21, 0.55);
+  background: radial-gradient(circle at top, #172554, #020617);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.challenge-overlay span,
+.challenge-overlay small { color: #cbd5e1; }
+
+.challenge-overlay strong {
+  color: #fde047;
+  font-size: 54px;
+  line-height: 1;
+}
+
+.challenge-overlay button {
+  min-width: 160px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #facc15;
   color: #0a1440;
-  font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 12px;
-  border: none;
-  font-size: 16px;
+  font-weight: 800;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.gold-button:hover {
-  background-color: #eab308;
+.challenge-overlay button.overlay-exit {
+  background: transparent;
+  color: #e2e8f0;
+  border: 1px solid #64748b;
 }
 
-.exit-button {
-  background-color: #444;
-  color: white;
-  font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 12px;
-  border: none;
-  font-size: 16px;
+/* ---------------------- */
+/* GOLDEN LETTERS BUTTON (NEW) */
+/* ---------------------- */
+
+.challenge-goldenletters-btn {
+  width: 90%;
+  max-width: 320px;
+  margin-top: 6px;
+  padding: 12px 16px;
+
+  border-radius: 999px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  background: rgba(250, 204, 21, 0.12);
+  color: #facc15;
+
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    background-color 0.12s ease;
 }
 
-.exit-button:hover {
-  background-color: #666;
+.challenge-goldenletters-btn:hover {
+  background: rgba(250, 204, 21, 0.16);
+  box-shadow: 0 12px 26px rgba(250, 204, 21, 0.14);
 }
 
-/* Back & Exit Button (shared) */
+.challenge-goldenletters-btn:active {
+  transform: translateY(1px);
+}
+
+/* ---------------------- */
+/* EXIT BUTTONS */
+/* ---------------------- */
+
 .back-home-button,
 .exit-mode-button,
 .exit-lobby-button {
-  margin-top: 10px;
-  padding: 10px 20px;
+  margin-top: 8px;
+  padding: 9px 18px;
   background-color: transparent;
-  color: white;
-  border: 2px solid white;
-  border-radius: 10px;
-  font-weight: bold;
-  font-size: 16px;
+  color: #f9fafb;
+  border: 1px solid rgba(249, 250, 251, 0.7);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+  transition: background-color 0.25s, color 0.25s,
+    transform 0.15s, box-shadow 0.15s;
 }
 
 .back-home-button:hover,
 .exit-mode-button:hover,
 .exit-lobby-button:hover {
-  background-color: white;
+  background-color: #f9fafb;
   color: #0a1440;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.7);
 }
 
-/* Waiting Room */
+/* ---------------------- */
+/* WAITING ROOM */
+/* ---------------------- */
+
 .waiting-room {
   text-align: center;
   margin-top: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 0 16px;
 }
 
 .waiting-title {
-  font-size: 26px;
-  font-weight: bold;
-  margin-bottom: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
 .waiting-subtext {
-  font-size: 16px;
-  margin-bottom: 20px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  max-width: 320px;
+}
+
+.waiting-room-code {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.room-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(250, 204, 21, 0.7);
+  background-color: rgba(15, 23, 42, 0.7);
+  font-weight: 700;
+  color: #fde68a;
+  font-size: 14px;
 }
 
 .player-status {
-  font-size: 14px;
-  margin-bottom: 10px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  color: #fde68a;
 }
 
-.waiting-message {
-  font-size: 14px;
-  margin-bottom: 25px;
-  color: #facc15;
-}
+/* Loader */
 
-/* Loader Animation */
 .animated-loader {
   width: 40px;
   height: 40px;
@@ -239,13 +549,9 @@
   margin-bottom: 20px;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Shake animation for wrong answers */
+/* Shake effect */
 @keyframes shake {
   0% { transform: translateX(0); }
   25% { transform: translateX(-5px); }
@@ -256,4 +562,53 @@
 
 .challenge-flashcard.shake {
   animation: shake 0.4s ease;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .top-bar {
+    max-width: 360px;
+    padding: 8px 10px;
+  }
+
+  .top-bar-left,
+  .top-bar-right { gap: 4px; }
+
+  .timer-chip,
+  .difficulty-chip,
+  .score-box,
+  .streak-pill { padding: 4px 7px; font-size: 11px; }
+
+  .challenge-flashcard {
+    width: 280px;
+    padding: 20px 14px 14px;
+    min-height: 180px;
+  }
+
+  .challenge-text {
+    font-size: 19px;
+  }
+
+  .answer-options {
+    max-width: 300px;
+  }
+
+  .answer-button {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .challenge-goldenletters-btn {
+    max-width: 300px;
+    font-size: 13px;
+    padding: 11px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .challenge-page *,
+  .results-page * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

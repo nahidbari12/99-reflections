@@ -1,130 +1,409 @@
-.chess-container {
-  background-color: #0b1b36;
-  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
-  background-size: cover;
-  background-position: center;
-  color: white;
-  min-height: 100vh;
-  padding: 20px;
+/* =========================================
+   Checkers / Quiz Gate Shared Styles
+   ========================================= */
+
+.checkers-wrapper-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  background: #0b1a2b; /* Dark starry night */
+  font-family: "Poppins", sans-serif;
+  color: #facc15;
+}
+
+/* Quiz Gate Container */
+.quiz-gate-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.quiz-gate-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #facc15;
+  font-weight: bold;
+}
+
+/* =========================================
+   Chess Gamer Mode · Premium UX
+   ========================================= */
+
+.chess-container {
+  min-height: 100vh;
+  padding: 1.75rem 1.2rem 1.75rem;
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(circle at bottom, rgba(250, 204, 21, 0.22), transparent 60%),
+    #020617;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  color: #e5e7eb;
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
 }
 
 .chess-header {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 1.5rem;
 }
 
-.arabic-calligraphy {
-  font-size: 28px;
+.chess-header .arabic-calligraphy {
+  font-size: 1.6rem;
   color: #facc15;
-  font-weight: bold;
+  margin-bottom: 0.25rem;
 }
 
-.game-title {
-  font-size: 18px;
-  color: white;
-  margin-bottom: 10px;
-}
-
-.notify-banner {
-  font-size: 20px;
-  font-weight: bold;
-  padding: 10px 16px;
-  margin: 10px 0;
-  background-color: rgba(250, 204, 21, 0.2);
+/* ✅ Gold pill border around "Asma’ul Husna · Chess" */
+.chess-header .game-title {
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 0.3rem 0.95rem;
+  border-radius: 999px;
   border: 1px solid #facc15;
-  border-radius: 12px;
-  animation: fadeInOut 3s ease-in-out;
-}
-
-@keyframes fadeInOut {
-  0%   { opacity: 0; transform: translateY(-10px); }
-  10%  { opacity: 1; transform: translateY(0); }
-  90%  { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-10px); }
-}
-
-/* Bonus & Checkmate Banners — reuse notify-banner styling */
-.check-banner,
-.checkmate-banner,
-.bonus-banner {
-  font-size: 20px;
-  font-weight: bold;
-  padding: 10px 16px;
-  margin: 10px 0;
-  border-radius: 12px;
-  border: 1px solid #facc15;
-  background-color: rgba(250, 204, 21, 0.2);
+  background: rgba(15, 23, 42, 0.9);
   color: #facc15;
-  animation: fadeInOut 3s ease-in-out;
-  will-change: opacity, transform;
-  backface-visibility: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.75);
 }
 
-/* NEW: Bonus Button Style */
-.bonus-button {
-  background-color: #facc15;
-  color: #0b1b36;
-  border: none;
-  padding: 10px 16px;
-  margin: 5px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+/* Main panel under header */
+
+.chess-main-panel {
+  width: 100%;
+  max-width: 780px;
+  background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.92), #020617);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow:
+    0 24px 45px rgba(15, 23, 42, 0.9),
+    0 0 0 1px rgba(15, 23, 42, 0.95);
+  padding: 1.5rem 1.75rem;
+  position: relative;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.bonus-button:hover {
-  background-color: #ffe066;
+/* Timer and streak */
+.timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
 
-/* NEW: Quit Button Style */
-.quit-button {
-  margin-top: 12px;
-  background-color: #facc15;
-  color: #0b1b36;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.quit-button:hover {
-  background-color: #ffe066;
-}
-
-/* NEW: Streak Bonus Banner */
-.streak-bonus-banner {
-  font-size: 20px;
-  font-weight: bold;
-  padding: 10px 16px;
-  margin: 10px 0;
-  border-radius: 12px;
-  border: 1px solid #facc15;
-  background-color: rgba(250, 204, 21, 0.2);
+.timer-pill {
+  min-width: 70px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(250, 204, 21, 0.7);
+  background: radial-gradient(circle at top, rgba(250, 204, 21, 0.2), #111827);
   color: #facc15;
-  animation: fadeInOut 3s ease-in-out;
-  will-change: opacity, transform;
-  backface-visibility: hidden;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.95rem;
 }
 
-/* NEW: Center banner over chess board */
-.center-banner {
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  pointer-events: none;
+.streak-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1.2rem;
+  color: #fbbf24;
 }
 
-/* ✅ FIXED: Ensure bonus banners display properly */
+.streak-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+/* Layout row: chessboard + bonus list */
+.chess-board-row {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+/* Chessboard wrapper */
 .chess-board-wrapper {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.4rem 0.5rem 0.75rem 1.1rem;
+  border-radius: 1.25rem;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.9), #020617);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  box-sizing: border-box;
+}
+
+/* Fully center internal react-chessboard wrapper */
+.chess-board-wrapper > div {
+  margin: 0 auto !important;
+}
+
+/* Bonus unlock panel (desktop landscape) */
+.chess-bonus-panel {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.chess-bonus-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.bonus-tile {
+  width: 100%;
+  font: inherit;
+  padding: 0.7rem;
+  border-radius: 0.85rem;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6b7280;
+  opacity: 0.6;
+  transition: all 0.25s ease-out;
+}
+
+button.bonus-tile.unlocked:not(:disabled) {
+  cursor: pointer;
+}
+
+button.bonus-tile:disabled {
+  cursor: not-allowed;
+}
+
+.bonus-tile.used {
+  opacity: 0.55;
+  filter: saturate(0.5);
+}
+
+.bonus-tile.unlocked {
+  color: #facc15;
+  opacity: 1;
+  background: rgba(250, 204, 21, 0.15);
+  border-color: rgba(250, 204, 21, 0.5);
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.25);
+}
+
+.bonus-tile.unlocked.pulse {
+  animation: bonusPulse 1.4s ease-out;
+}
+
+@keyframes bonusPulse {
+  0% { transform: scale(0.96); }
+  40% { transform: scale(1.04); box-shadow: 0 0 18px rgba(250, 204, 21, 0.4); }
+  100% { transform: scale(1); }
+}
+
+/* Banner (Check / Incorrect / Skipped Turn) */
+.bonus-banner.center-banner {
+  position: absolute;
+  top: 0.15rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(250, 204, 21, 0.9);
+  color: #facc15;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 5;
+  animation: chessBannerPop 0.3s ease-out;
+}
+
+@keyframes chessBannerPop {
+  from { opacity: 0; transform: translate(-50%, -8px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* Flashcard (question) */
+
+.challenge-flashcard {
+  width: 100%;
+  max-width: 720px;
+  max-height: 80vh;
+  margin: 0 auto;
+  padding: 1.4rem 1.2rem 1.5rem;
+  border-radius: 1.4rem;
+  background: radial-gradient(circle at top right, rgba(17,24,39,0.96), #020617);
+  border: 1px solid rgba(148,163,184,0.45);
+  box-shadow:
+    0 24px 45px rgba(15,23,42,0.9),
+    0 0 0 1px rgba(15,23,42,1);
+  text-align: center;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.challenge-flashcard.fade-in {
+  animation: chessFlashcardFade 0.45s ease-out;
+}
+
+@keyframes chessFlashcardFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.flashcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ✅ "Challenge Question" label white */
+.flashcard-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* ✅ Challenge timer styled like main chess timer-pill */
+.flashcard-timer {
+  font-size: 0.95rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(250, 204, 21, 0.7);
+  background: radial-gradient(circle at top, rgba(250, 204, 21, 0.2), #111827);
+  color: #facc15;
+  font-weight: 600;
+  text-align: center;
+}
+
+.flashcard-prompt {
+  margin: 1rem 0;
+  font-size: 1.4rem;
+  color: #f9fafb;
+}
+
+/* Answer choices */
+.answer-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.answer-button {
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.9rem;
+  background: rgba(15,23,42,0.93);
+  border: 1px solid rgba(148,163,184,0.5);
+  font-size: 0.95rem;
+  color: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+
+.answer-button.correct {
+  background: rgba(22, 163, 74, 0.9);
+  border-color: rgba(187, 247, 208, 0.95);
+}
+
+.answer-button.wrong {
+  background: rgba(220, 38, 38, 0.9);
+  border-color: rgba(254, 202, 202, 0.95);
+}
+
+/* Quit button */
+.quit-button {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(148,163,184,0.7);
+  background: transparent;
+  color: #e5e7eb;
+}
+
+/* =========================================
+   PORTRAIT FIX (Phones)
+   ========================================= */
+
+@media (max-width: 768px) and (orientation: portrait) {
+
+  .chess-container {
+    justify-content: flex-start;
+    padding: 1.25rem 0.75rem;
+  }
+
+  .chess-main-panel {
+    padding: 1.1rem 0.9rem;
+  }
+
+  /* Stack board & bonuses vertically */
+  .chess-board-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Reduce board padding so it fits */
+  .chess-board-wrapper {
+    width: 100%;
+    padding: 1rem 0.6rem 1rem 0.6rem;
+  }
+
+  /* Bonus panel becomes full width */
+  .chess-bonus-panel {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .bonus-tile {
+    width: 140px;
+  }
+
+}
+
+/* =========================================
+   Orientation Hint
+   ========================================= */
+
+.orientation-hint {
+  display: none;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.95);
+  border: 1px solid rgba(148,163,184,0.6);
+  color: #e5e7eb;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .orientation-hint {
+    display: block;
+  }
 }

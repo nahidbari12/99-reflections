@@ -1,0 +1,81 @@
+.learn-page {
+  min-height: 100vh;
+  background-color: #050b1a;
+  background-image: radial-gradient(circle at top, #1e3a8a 0, transparent 55%),
+    url("https://www.transparenttextures.com/patterns/stardust.png");
+  color: #f9fafb;
+  padding: 40px 20px;
+  font-family: "Poppins", sans-serif;
+  text-align: center;
+}
+
+.learn-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #facc15;
+}
+
+.learn-subtitle {
+  font-size: 16px;
+  max-width: 600px;
+  margin: 0 auto 30px;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.names-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.name-card {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 16px 10px;
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.name-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(250, 204, 21, 0.15);
+}
+
+.name-arabic {
+  font-size: 32px;
+  font-family: "Amiri", serif;
+  line-height: 1.55;
+  padding: 0.1em 4px;
+  direction: rtl;
+  margin-bottom: 8px;
+  color: #facc15;
+}
+
+.name-translit {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f9fafb;
+  margin-bottom: 4px;
+}
+
+.name-meaning {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.learn-footer {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.learn-link {
+  color: #facc15;
+  font-size: 15px;
+  text-decoration: underline;
+}

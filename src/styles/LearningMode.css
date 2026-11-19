@@ -1,0 +1,211 @@
+/* /src/styles/LearningMode.css */
+
+.learning-page {
+  min-height: 100vh;
+  background-color: #050b1a;
+  background-image: radial-gradient(circle at top, #1e3a8a 0, transparent 55%),
+    url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-size: cover;
+  background-position: center;
+  color: #f9fafb;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 12px 40px;
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+/* Inner container – subtle glass panel to match premium UX */
+.learning-inner {
+  width: 100%;
+  max-width: 480px;
+  background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
+  padding: 18px 16px 18px;
+  backdrop-filter: blur(14px);
+}
+
+/* ===== Header ===== */
+.learning-header {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* NEW — replaces the emoji */
+.learning-title-icon {
+  height: 26px;
+  width: 26px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 6px;
+  filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.55));
+}
+
+/* Slight gradient / glow title */
+.learning-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  background: linear-gradient(120deg, #facc15, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 12px rgba(250, 204, 21, 0.35);
+}
+
+/* Soft divider under header */
+.learning-header::after {
+  content: "";
+  display: block;
+  margin: 10px auto 0;
+  width: 60%;
+  max-width: 220px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(148, 163, 184, 0.7),
+    transparent
+  );
+}
+
+.learning-subtitle {
+  font-size: 13px;
+  opacity: 0.95;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+/* ===== Cards grid ===== */
+.learning-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* Side-by-side on wider screens */
+@media (min-width: 600px) {
+  .learning-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ===== Cards ===== */
+.learning-card {
+  border: none;
+  cursor: pointer;
+  padding: 16px 16px 14px;
+  border-radius: 20px;
+  background: radial-gradient(circle at top left, #fefce8, #f5f3ff);
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.8);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease, background 0.18s ease;
+  color: #0f172a;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Soft golden glow on hover */
+.learning-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(
+    circle at top,
+    rgba(250, 204, 21, 0.35),
+    transparent 60%
+  );
+  opacity: 0;
+  transform: translateY(10%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.learning-card:hover::before {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.learning-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.95);
+  border-color: rgba(250, 204, 21, 0.9);
+}
+
+/* Icon – make it a pill badge */
+.learning-card-icon {
+  font-size: 18px;
+  height: 36px;
+  width: 36px;
+  min-width: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #fef9c3, #fee2e2);
+  border: 1px solid rgba(250, 204, 21, 0.85);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.35);
+  margin-bottom: 4px;
+}
+
+.learning-card-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.learning-card-text {
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* ===== Back button ===== */
+.learning-back-button {
+  margin-top: 8px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(249, 250, 251, 0.75);
+  background: rgba(15, 23, 42, 0.9);
+  color: #f9fafb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.9);
+  transition: background 0.16s ease, color 0.16s ease,
+    box-shadow 0.16s ease, border-color 0.16s ease, transform 0.12s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.learning-back-button:hover {
+  background-color: #f9fafb;
+  color: #0a1440;
+  border-color: rgba(249, 250, 251, 0.95);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.95);
+  transform: translateY(-1px);
+}
+
+/* ===== Responsive tweaks ===== */
+@media (max-width: 480px) {
+  .learning-title {
+    font-size: 22px;
+  }
+
+  .learning-inner {
+    padding: 16px 12px 16px;
+  }
+
+  .learning-card {
+    padding: 14px 14px 12px;
+  }
+}

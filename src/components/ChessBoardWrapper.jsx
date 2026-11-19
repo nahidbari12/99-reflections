@@ -1,413 +1,258 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
-import namesOfAllah from "../data/names";
+import { buildMeaningQuestion, recordGameAttempt, saveGameResult } from "../utils/gameUtils";
+import { chooseChessCpuMove, isSupportedChessDifficulty } from "../utils/chessEngine";
 import "../styles/ChessBoardWrapper.css";
+
+const PLAYER_SECONDS = 30;
+const BONUS_SECONDS = 45;
+const QUESTION_SECONDS = 10;
 
 function ChessBoardWrapper() {
   const navigate = useNavigate();
   const game = useRef(new Chess());
-  const streakBonusAppliedRef = useRef(false);
-  const lastCheckSource = useRef(null);
-  const questionResultHandledRef = useRef(true);
-
+  const mountedRef = useRef(true);
+  const phaseRef = useRef("player");
+  const timersRef = useRef(new Set());
+  const previousTurnFenRef = useRef(null);
+  const timerBonusRef = useRef(false);
+  const resultSavedRef = useRef(false);
+  const statsRef = useRef({ correct: 0, wrongAnswers: [], streak: 0 });
   const [gamePosition, setGamePosition] = useState("start");
-  const [showQuestion, setShowQuestion] = useState(false);
+  const [phase, setPhaseState] = useState("player");
   const [question, setQuestion] = useState(null);
-  const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [questionTimer, setQuestionTimer] = useState(10);
-  const [moveTimer, setMoveTimer] = useState(30);
-  const [moveTimerRunning, setMoveTimerRunning] = useState(false);
+  const [questionTimer, setQuestionTimer] = useState(QUESTION_SECONDS);
+  const [moveTimer, setMoveTimer] = useState(PLAYER_SECONDS);
   const [streak, setStreak] = useState(0);
-  const [correctAnswers, setCorrectAnswers] = useState(0);
   const [notify, setNotify] = useState("");
   const [availableBonuses, setAvailableBonuses] = useState([]);
-  const [usedBonusThisTurn, setUsedBonusThisTurn] = useState(false);
   const [usedBonuses, setUsedBonuses] = useState({});
-  const [doubleMoveActive, setDoubleMoveActive] = useState(false);
-  const [doubleMoveCount, setDoubleMoveCount] = useState(0);
-  const [wrongAnswers, setWrongAnswers] = useState([]);
-  const [playerTurnActive, setPlayerTurnActive] = useState(true);
+  const [usedBonusThisTurn, setUsedBonusThisTurn] = useState(false);
+  const [hintSquares, setHintSquares] = useState({});
   const [cpuDifficulty, setCpuDifficulty] = useState("medium");
+  const [boardSize, setBoardSize] = useState(350);
 
-  const handleTimeout = () => {
-    if (!questionResultHandledRef.current || selected !== null) return;
-    questionResultHandledRef.current = false;
-    setStreak(0);
-    setWrongAnswers((prev) => [...prev, question]);
-    setNotify("Incorrect");
-
-    setTimeout(() => {
-      setSelected(null);
-      setQuestion(null);
-      setShowQuestion(false);
-      setTimeout(() => {
-        setNotify("");
-        questionResultHandledRef.current = true;
-        triggerCpuMove();
-      }, 100);
-    }, 50);
-  };
-
-  useEffect(() => {
-    const difficulty = localStorage.getItem("cpuDifficulty") || "medium";
-    setCpuDifficulty(difficulty);
-    startPlayerTurn();
+  const setPhase = useCallback((next) => {
+    phaseRef.current = next;
+    if (mountedRef.current) setPhaseState(next);
   }, []);
-  useEffect(() => {
-    if (!showQuestion && moveTimerRunning) {
-      const timer = setInterval(() => {
-        setMoveTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setMoveTimerRunning(false);
-            setPlayerTurnActive(false);
-            setNotify("Turn Skipped");
-            setTimeout(() => setNotify(""), 2000);
-            triggerCpuMove();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [moveTimerRunning, showQuestion]);
-
-  useEffect(() => {
-    if (!showQuestion || selected !== null) return;
-
-    const interval = setInterval(() => {
-      setQuestionTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          handleTimeout();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [showQuestion, selected]);
-
-  useEffect(() => {
-    if (streak === 3 && !streakBonusAppliedRef.current) {
-      streakBonusAppliedRef.current = true;
-      setMoveTimer(45);
-    }
-    if (streak === 6 && !availableBonuses.includes("undo"))
-      setAvailableBonuses((p) => [...p, "undo"]);
-    if (streak === 9 && !availableBonuses.includes("doubleMove"))
-      setAvailableBonuses((p) => [...p, "doubleMove"]);
-  }, [streak]);
-
-  const isCheckmate = () => {
-    return game.current.inCheck() && game.current.moves().length === 0;
-  };
-
-  const startPlayerTurn = () => {
-    questionResultHandledRef.current = true;
-    setPlayerTurnActive(true);
-    setMoveTimer(streakBonusAppliedRef.current ? 45 : 30);
-    setMoveTimerRunning(true);
+  const schedule = useCallback((callback, delay) => {
+    const id = window.setTimeout(() => {
+      timersRef.current.delete(id);
+      if (mountedRef.current) callback();
+    }, delay);
+    timersRef.current.add(id);
+    return id;
+  }, []);
+  const clearScheduled = useCallback(() => {
+    timersRef.current.forEach((id) => window.clearTimeout(id));
+    timersRef.current.clear();
+  }, []);
+  const announce = useCallback((message, duration = 1600) => {
+    setNotify(message);
+    if (duration) schedule(() => setNotify(""), duration);
+  }, [schedule]);
+  const finishGame = useCallback((winner, outcome) => {
+    if (resultSavedRef.current || phaseRef.current === "finished") return;
+    resultSavedRef.current = true;
+    setPhase("finished");
+    clearScheduled();
+    const stats = statsRef.current;
+    saveGameResult("chess", { outcome, score: stats.correct * 10 });
+    navigate("/chess-results", { state: { winner, streak: stats.streak, correctAnswers: stats.correct, totalQuestions: stats.correct + stats.wrongAnswers.length, wrongAnswers: stats.wrongAnswers } });
+  }, [clearScheduled, navigate, setPhase]);
+  const startPlayerTurn = useCallback(() => {
+    if (phaseRef.current === "finished") return;
+    setPhase("player");
+    setMoveTimer(timerBonusRef.current ? BONUS_SECONDS : PLAYER_SECONDS);
     setUsedBonusThisTurn(false);
-  };
-
-  const handlePieceDrop = (source, target) => {
-    if (!playerTurnActive || showQuestion || game.current.turn() !== "w" || !questionResultHandledRef.current) return false;
-
-    const move = game.current.move({ from: source, to: target, promotion: "q" });
-    if (move === null) return false;
-
-    setGamePosition(game.current.fen());
-    setMoveTimerRunning(false);
-    setPlayerTurnActive(false);
-
-    if (game.current.inCheck() && lastCheckSource.current !== game.current.fen()) {
-      lastCheckSource.current = game.current.fen();
-      setNotify("Check!");
-      setTimeout(() => setNotify(""), 3000);
-    }
-
-    if (isCheckmate()) {
-      setNotify("Checkmate!");
-      setTimeout(() => {
-        navigate("/chess-results", {
-          state: {
-            winner: "You",
-            streak,
-            correctAnswers,
-            totalQuestions: correctAnswers + wrongAnswers.length,
-            wrongAnswers
-          }
-        });
-      }, 3000);
-      return true;
-    }
-
-    if (doubleMoveActive && doubleMoveCount === 0) {
-      setDoubleMoveCount(1);
-      setMoveTimerRunning(true);
-      setPlayerTurnActive(true);
-      return true;
-    } else if (doubleMoveActive && doubleMoveCount === 1) {
-      setDoubleMoveActive(false);
-      setDoubleMoveCount(0);
-    }
-
-    setTimeout(() => {
-      questionResultHandledRef.current = false;
-      generateQuestion();
-      setShowQuestion(true);
-    }, 500);
-
-    return true;
-  };
-  const generateQuestion = () => {
-    const current = namesOfAllah[Math.floor(Math.random() * namesOfAllah.length)];
-    const correct = current.meaning;
-    const allOptions = namesOfAllah.map((n) => n.meaning);
-    const wrongOptions = new Set();
-
-    while (wrongOptions.size < 1) {
-      const rand = allOptions[Math.floor(Math.random() * allOptions.length)];
-      if (rand !== correct) wrongOptions.add(rand);
-    }
-
-    const mixed = [correct, ...Array.from(wrongOptions)].sort(() => Math.random() - 0.5);
-    setQuestion({ prompt: current.name, correct });
-    setOptions(mixed);
-    setSelected(null);
-    setQuestionTimer(10);
-    questionResultHandledRef.current = true;
-  };
-
-  const handleAnswer = (choice) => {
-    setSelected(choice);
-    const correct = choice === question.correct;
-
-    if (correct) {
-      setCorrectAnswers((prev) => prev + 1);
-      setStreak((s) => s + 1);
-    } else {
-      setStreak(0);
-      setWrongAnswers((prev) => [...prev, question]);
-      setNotify("Incorrect");
-      setTimeout(() => setNotify(""), 1500);
-    }
-
-    setTimeout(() => {
-      setShowQuestion(false);
-      triggerCpuMove();
-    }, 1000);
-  };
-
-  const triggerCpuMove = () => {
-    setMoveTimerRunning(false);
-    setTimeout(() => makeCpuMove(), 600);
-  };
-
-  const makeCpuMove = () => {
-    if (game.current.game_over) return;
-
-    const legalMoves = game.current.moves({ verbose: true });
-
-    if (legalMoves.length === 0) {
-      const isCheck = game.current.inCheck();
-      const result = isCheck ? "Checkmate!" : "Draw!";
-      const winner = isCheck ? "You" : "Draw";
-
-      setNotify(result);
-      setTimeout(() => {
-        navigate("/chess-results", {
-          state: {
-            winner,
-            streak,
-            correctAnswers,
-            totalQuestions: correctAnswers + wrongAnswers.length,
-            wrongAnswers
-          }
-        });
-      }, 3000);
+  }, [setPhase]);
+  const makeCpuMove = useCallback(() => {
+    if (phaseRef.current !== "cpu" || game.current.turn() !== "b") return;
+    const move = chooseChessCpuMove(game.current.fen(), cpuDifficulty);
+    if (!move) {
+      const draw = !game.current.isCheckmate();
+      finishGame(draw ? "Draw" : "You", draw ? "draw" : "win");
       return;
     }
-
-    let move;
-
-    if (cpuDifficulty === "easy") {
-      move = legalMoves[Math.floor(Math.random() * legalMoves.length)];
-    } else if (cpuDifficulty === "medium") {
-      const captures = legalMoves.filter(m => m.flags.includes("c"));
-      move = captures.length > 0
-        ? captures[Math.floor(Math.random() * captures.length)]
-        : legalMoves[Math.floor(Math.random() * legalMoves.length)];
-    } else if (cpuDifficulty === "hard") {
-      let bestEval = -Infinity;
-      let bestMove = legalMoves[0];
-
-      for (const m of legalMoves) {
-        const tempGame = new Chess(game.current.fen());
-        tempGame.move(m.san);
-
-        let evalScore = 0;
-        const pieces = tempGame.board().flat();
-        pieces.forEach(piece => {
-          if (piece) {
-            const val = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 }[piece.type];
-            evalScore += piece.color === 'b' ? val : -val;
-          }
-        });
-
-        if (evalScore > bestEval) {
-          bestEval = evalScore;
-          bestMove = m;
-        }
-      }
-
-      move = bestMove;
-    }
-
     game.current.move(move.san);
     setGamePosition(game.current.fen());
-
-    if (game.current.inCheck() && lastCheckSource.current !== game.current.fen()) {
-      lastCheckSource.current = game.current.fen();
-      setNotify("Check!");
-      setTimeout(() => setNotify(""), 3000);
-    }
-
-    if (isCheckmate()) {
-      setNotify("Checkmate!");
-      setTimeout(() => {
-        navigate("/chess-results", {
-          state: {
-            winner: "CPU",
-            streak,
-            correctAnswers,
-            totalQuestions: correctAnswers + wrongAnswers.length,
-            wrongAnswers
-          }
-        });
-      }, 3000);
+    if (game.current.isGameOver()) {
+      const draw = !game.current.isCheckmate();
+      announce(draw ? "Draw!" : "Checkmate!", 0);
+      schedule(() => finishGame(draw ? "Draw" : "CPU", draw ? "draw" : "loss"), 900);
       return;
     }
-
+    if (game.current.inCheck()) announce("Check!", 1200);
     startPlayerTurn();
-  };
+  }, [announce, cpuDifficulty, finishGame, schedule, startPlayerTurn]);
+  const beginCpuTurn = useCallback(() => {
+    if (phaseRef.current === "finished") return;
+    setPhase("cpu");
+    schedule(makeCpuMove, 450);
+  }, [makeCpuMove, schedule, setPhase]);
+  const openQuestion = useCallback(() => {
+    if (phaseRef.current !== "question-pending") return;
+    const next = buildMeaningQuestion(null, 4);
+    setQuestion(next);
+    setSelected(null);
+    setQuestionTimer(QUESTION_SECONDS);
+    setPhase("question");
+  }, [setPhase]);
 
-  const handleBonusClick = (bonus) => {
-    if (usedBonusThisTurn || usedBonuses[bonus]) return;
-
-    setUsedBonuses((prev) => ({ ...prev, [bonus]: true }));
-    setUsedBonusThisTurn(true);
-
-    if (bonus === "undo") {
-      game.current.undo();
-      game.current.undo();
+  useEffect(() => {
+    mountedRef.current = true;
+    phaseRef.current = "player";
+    const saved = localStorage.getItem("cpuDifficulty");
+    setCpuDifficulty(isSupportedChessDifficulty(saved) ? saved : "medium");
+    const resize = () => setBoardSize(Math.max(260, Math.min(350, (window.innerWidth || 360) - 40)));
+    resize();
+    window.addEventListener("resize", resize);
+    return () => {
+      mountedRef.current = false;
+      phaseRef.current = "finished";
+      clearScheduled();
+      window.removeEventListener("resize", resize);
+    };
+  }, [clearScheduled]);
+  useEffect(() => {
+    if (phase !== "player") return undefined;
+    const interval = window.setInterval(() => setMoveTimer((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(interval);
+  }, [phase]);
+  useEffect(() => {
+    if (phase !== "player" || moveTimer !== 0) return;
+    setPhase("cpu");
+    const legal = game.current.moves({ verbose: true });
+    if (game.current.turn() === "w" && legal.length) {
+      previousTurnFenRef.current = game.current.fen();
+      const quiet = legal.filter((move) => !move.captured);
+      const forced = quiet[Math.floor(Math.random() * quiet.length)] || legal[0];
+      game.current.move(forced.san);
       setGamePosition(game.current.fen());
-      setNotify("Bonus: Undo");
-      setTimeout(() => setNotify(""), 3000);
-      startPlayerTurn();
-    } else if (bonus === "doubleMove") {
-      setDoubleMoveActive(true);
-      setDoubleMoveCount(0);
-      setMoveTimer(30);
-      setMoveTimerRunning(true);
-      setPlayerTurnActive(true);
-      setNotify("Bonus: Double Move");
-      setTimeout(() => setNotify(""), 3000);
+      announce(`Time expired · auto-moved ${forced.from}–${forced.to}`, 1200);
+      if (game.current.isGameOver()) {
+        const draw = !game.current.isCheckmate();
+        schedule(() => finishGame(draw ? "Draw" : "You", draw ? "draw" : "win"), 900);
+      } else schedule(makeCpuMove, 450);
     }
+  }, [announce, finishGame, makeCpuMove, moveTimer, phase, schedule, setPhase]);
+  useEffect(() => {
+    if (phase !== "question" || selected !== null) return undefined;
+    const interval = window.setInterval(() => setQuestionTimer((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(interval);
+  }, [phase, selected]);
+
+  const completeQuestion = useCallback((isCorrect) => {
+    if (phaseRef.current !== "question" || !question) return;
+    setPhase("question-result");
+    recordGameAttempt(question.card, isCorrect, "chess", Math.max(1, QUESTION_SECONDS - questionTimer));
+    if (isCorrect) {
+      statsRef.current.correct += 1;
+      statsRef.current.streak += 1;
+      setStreak(statsRef.current.streak);
+      announce("+1 Correct", 800);
+    } else {
+      statsRef.current.streak = 0;
+      statsRef.current.wrongAnswers = [...statsRef.current.wrongAnswers, question];
+      setStreak(0);
+      announce(`Incorrect · ${question.correct}`, 900);
+    }
+    schedule(() => {
+      setQuestion(null);
+      setSelected(null);
+      beginCpuTurn();
+    }, 900);
+  }, [announce, beginCpuTurn, question, questionTimer, schedule, setPhase]);
+  useEffect(() => {
+    if (phase === "question" && questionTimer === 0 && selected === null) {
+      setSelected("__timeout__");
+      completeQuestion(false);
+    }
+  }, [completeQuestion, phase, questionTimer, selected]);
+  useEffect(() => {
+    if (streak >= 3 && !timerBonusRef.current) {
+      timerBonusRef.current = true;
+      setMoveTimer(BONUS_SECONDS);
+      announce("Reward unlocked: 45-second turns", 1800);
+    }
+    if (streak >= 6) setAvailableBonuses((items) => items.includes("undo") ? items : [...items, "undo"]);
+    if (streak >= 9) setAvailableBonuses((items) => items.includes("hint") ? items : [...items, "hint"]);
+  }, [announce, streak]);
+
+  const handlePieceDrop = (source, target) => {
+    if (phaseRef.current !== "player" || game.current.turn() !== "w") return false;
+    const beforeMove = game.current.fen();
+    const move = game.current.move({ from: source, to: target, promotion: "q" });
+    if (!move) return false;
+    previousTurnFenRef.current = beforeMove;
+    setGamePosition(game.current.fen());
+    setPhase("question-pending");
+    if (game.current.isGameOver()) {
+      const draw = !game.current.isCheckmate();
+      schedule(() => finishGame(draw ? "Draw" : "You", draw ? "draw" : "win"), 700);
+    } else schedule(openQuestion, 350);
+    return true;
+  };
+  const handleAnswer = (choice) => {
+    if (phaseRef.current !== "question" || selected !== null || !question) return;
+    setSelected(choice);
+    completeQuestion(choice === question.correct);
+  };
+  const handleBonusClick = (bonus) => {
+    if (phaseRef.current !== "player" || usedBonusThisTurn || usedBonuses[bonus]) return;
+    if (bonus === "undo") {
+      if (!previousTurnFenRef.current) {
+        announce("Undo is available after a full turn");
+        return;
+      }
+      game.current.load(previousTurnFenRef.current);
+      previousTurnFenRef.current = null;
+      setGamePosition(game.current.fen());
+      setUsedBonuses((items) => ({ ...items, undo: true }));
+      setUsedBonusThisTurn(true);
+      setMoveTimer(timerBonusRef.current ? BONUS_SECONDS : PLAYER_SECONDS);
+      announce("Reward used: full turn undone");
+      return;
+    }
+    const legal = game.current.moves({ verbose: true });
+    const suggestion = legal.find((move) => move.san.includes("#")) || legal.find((move) => move.captured) || legal.find((move) => move.san.includes("+")) || legal[0];
+    if (!suggestion) return;
+    setHintSquares({ [suggestion.from]: { boxShadow: "inset 0 0 0 4px #38bdf8" }, [suggestion.to]: { boxShadow: "inset 0 0 0 4px #facc15" } });
+    setUsedBonuses((items) => ({ ...items, hint: true }));
+    setUsedBonusThisTurn(true);
+    announce(`Hint: ${suggestion.from} → ${suggestion.to}`, 3000);
+    schedule(() => setHintSquares({}), 3000);
   };
 
-  const streakHearts = Array(3).fill("🖤").map((h, i) => i < streak ? "💛" : "🖤");
+  const timerBonusActive = timerBonusRef.current;
+  const undoUnlocked = availableBonuses.includes("undo");
+  const hintUnlocked = availableBonuses.includes("hint");
+  const streakHearts = Array.from({ length: 9 }, (_, index) => index < streak ? "💛" : "🖤").join(" ");
+  const isQuestion = phase === "question" || phase === "question-result";
 
-  return (
-    <div className="chess-container">
-      <div className="chess-header">
-        <div className="arabic-calligraphy">أسماء الحسنى</div>
-        <div className="game-title">Asma’ul Husna</div>
+  return <div className="chess-container">
+    <div className="chess-header"><div className="arabic-calligraphy">أسماء الحسنى</div><div className="game-title">Asma’ul Husna · Chess</div></div>
+    {isQuestion ? <div className="challenge-flashcard fade-in">
+      <div className="flashcard-header"><span className="flashcard-label">Challenge Question</span><span className="flashcard-timer">{questionTimer}s</span></div>
+      <h2 className="flashcard-prompt">{question?.prompt}</h2>
+      <div className="answer-options">{question?.options.map((option) => <button key={option} className={`answer-button ${selected ? (option === question.correct ? "correct" : selected === option ? "wrong" : "") : ""}`} onClick={() => handleAnswer(option)} disabled={phase !== "question" || selected !== null}>{option}</button>)}</div>
+    </div> : <div className="chess-main-panel">
+      <div className="timer-row"><div className="timer-pill">{phase === "cpu" ? "CPU thinking…" : `${moveTimer}s`}</div><div className="streak-meter"><span>{streakHearts}</span><div className="streak-label">STREAK</div></div></div>
+      <div className="chess-board-row">
+        <div className="chess-board-wrapper">{notify && <div className="bonus-banner center-banner" role="status">{notify}</div>}<Chessboard position={gamePosition} onPieceDrop={handlePieceDrop} arePiecesDraggable={phase === "player"} boardWidth={boardSize} customDarkSquareStyle={{ backgroundColor: "#102030" }} customLightSquareStyle={{ backgroundColor: "#203040" }} customSquareStyles={hintSquares} boardStyle={{ border: "2px solid #facc15" }} /></div>
+        <div className="chess-bonus-panel"><div className="chess-bonus-title">Rewards</div>
+          <div className={`bonus-tile ${timerBonusActive ? "unlocked" : ""}`}><div className="bonus-tile-label"><span>⏱️</span><span>45s Turns</span></div><div className="bonus-tile-caption">{timerBonusActive ? "Active for this game" : "Unlocks at 3-streak"}</div></div>
+          <button type="button" className={`bonus-tile ${undoUnlocked ? "unlocked" : ""} ${usedBonuses.undo ? "used" : ""}`} disabled={!undoUnlocked || usedBonuses.undo || phase !== "player"} onClick={() => handleBonusClick("undo")}><span className="bonus-tile-label"><span>↩️</span><span>Undo Move</span></span><span className="bonus-tile-caption">{usedBonuses.undo ? "Used" : "Unlocks at 6-streak"}</span></button>
+          <button type="button" className={`bonus-tile ${hintUnlocked ? "unlocked" : ""} ${usedBonuses.hint ? "used" : ""}`} disabled={!hintUnlocked || usedBonuses.hint || phase !== "player"} onClick={() => handleBonusClick("hint")}><span className="bonus-tile-label"><span>💡</span><span>Tactical Hint</span></span><span className="bonus-tile-caption">{usedBonuses.hint ? "Used" : "Unlocks at 9-streak"}</span></button>
+        </div>
       </div>
-
-      {showQuestion && question ? (
-        <div className="challenge-flashcard fade-in">
-          <h2>{question?.prompt}</h2>
-          <div className="timer-label">{questionTimer}s</div>
-          <div className="answer-options">
-            {options.map((option, i) => (
-              <button
-                key={i}
-                className={`answer-button ${
-                  selected &&
-                  selected !== "__timeout__" &&
-                  (option === question.correct
-                    ? "correct"
-                    : selected === option
-                    ? "wrong"
-                    : "")
-                }`}
-                onClick={() => handleAnswer(option)}
-                disabled={selected !== null}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div className="timer-label">{moveTimer}s</div>
-          <div className="chess-board-wrapper">
-            {notify && <div className="bonus-banner center-banner">{notify}</div>}
-            <Chessboard
-              position={gamePosition}
-              onPieceDrop={handlePieceDrop}
-              boardWidth={350}
-              customDarkSquareStyle={{ backgroundColor: "#102030" }}
-              customLightSquareStyle={{ backgroundColor: "#203040" }}
-              boardStyle={{ border: "2px solid #facc15" }}
-              customPieces={{
-                wP: () => <span style={{ color: "white", fontSize: 28 }}>♙</span>,
-                wR: () => <span style={{ color: "white", fontSize: 28 }}>♖</span>,
-                wN: () => <span style={{ color: "white", fontSize: 28 }}>♘</span>,
-                wB: () => <span style={{ color: "white", fontSize: 28 }}>♗</span>,
-                wQ: () => <span style={{ color: "white", fontSize: 28 }}>♕</span>,
-                wK: () => <span style={{ color: "white", fontSize: 28 }}>♔</span>,
-                bP: () => <span style={{ color: "gold", fontSize: 28 }}>♟</span>,
-                bR: () => <span style={{ color: "gold", fontSize: 28 }}>♜</span>,
-                bN: () => <span style={{ color: "gold", fontSize: 28 }}>♞</span>,
-                bB: () => <span style={{ color: "gold", fontSize: 28 }}>♝</span>,
-                bQ: () => <span style={{ color: "gold", fontSize: 28 }}>♛</span>,
-                bK: () => <span style={{ color: "gold", fontSize: 28 }}>♚</span>,
-              }}
-            />
-          </div>
-          <div className="streak-meter">
-            {streakHearts.join(" ")} <div>STREAK</div>
-          </div>
-          {availableBonuses.length > 0 && (
-            <div className="bonus-bar">
-              {availableBonuses.map((bonus) => (
-                <button
-                  key={bonus}
-                  className="bonus-button"
-                  onClick={() => handleBonusClick(bonus)}
-                >
-                  {bonus === "undo" && "↩️ Undo"}
-                  {bonus === "doubleMove" && "🔁 Double Move"}
-                </button>
-              ))}
-            </div>
-          )}
-          <button className="quit-button" onClick={() => navigate("/gamer-mode")}>
-            ❌ Quit & Exit
-          </button>
-        </div>
-      )}
-    </div>
-  );
+      <button className="quit-button" onClick={() => { setPhase("finished"); clearScheduled(); navigate("/gamer-mode"); }}>❌ Quit &amp; Exit</button>
+    </div>}
+  </div>;
 }
 
 export default ChessBoardWrapper;

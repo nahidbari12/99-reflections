@@ -55,7 +55,7 @@ function EnterMatch() {
 
         <button
           className="back-home-button"
-          onClick={() => navigate("/mode-selection")}
+          onClick={() => navigate("/")}
         >
           ⬅ Back
         </button>
