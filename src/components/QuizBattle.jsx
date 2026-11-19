@@ -3,7 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import "../styles/QuizBattle.css";
 
 const endpoint = (import.meta.env.VITE_MULTIPLAYER_URL || "").replace(/\/+$/, "");
-const codePattern = /^[A-F0-9]{10}$/;
+const codePattern = /^(?:[0-9]{4}|[A-F0-9]{10})$/;
+const roomCode = () => String(crypto.getRandomValues(new Uint32Array(1))[0] % 10000).padStart(4, "0");
 const randomHex = size => Array.from(crypto.getRandomValues(new Uint8Array(size)),
   byte => byte.toString(16).padStart(2, "0")).join("");
 const identityKey = "reflection-quiz-battle-profile";
@@ -18,7 +19,7 @@ async function api(path, body) {
     signal: AbortSignal.timeout(10000),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Multiplayer is temporarily unavailable.");
+  if (!response.ok) throw Object.assign(new Error(data.error || "Multiplayer is temporarily unavailable."), { status: response.status });
   return data;
 }
 
@@ -47,7 +48,7 @@ export default function QuizBattle() {
     const request = ++leaderboardRequest.current;
     setLeaderError(false);
     try {
-      const data = await api("/leaderboard");
+      const data = await api("/leaderboard?scoring=points");
       if (request === leaderboardRequest.current && mounted.current) setLeaders(data.players);
     } catch {
       if (request === leaderboardRequest.current && mounted.current) setLeaderError(true);
@@ -70,9 +71,11 @@ export default function QuizBattle() {
     let handshake;
     let failures = 0;
     let joined = false;
+    let collisions = 0;
+    let joiningCode = active.code;
 
     function connect() {
-      const url = new URL(endpoint + "/rooms/" + active.code + "/" + (joined ? "join" : active.mode));
+      const url = new URL(endpoint + "/rooms/" + joiningCode + "/" + (joined ? "join" : active.mode));
       url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
       const ws = new WebSocket(url);
       socket.current = ws;
@@ -92,7 +95,12 @@ export default function QuizBattle() {
         clearTimeout(handshake);
         if (cancelled) return;
         setOnline(false);
-        if (![1008, 4001].includes(event.code) && failures++ < 4) {
+        if (event.code === 4002 && !joined && active.mode === "create" && collisions++ < 8) {
+          joiningCode = roomCode();
+          connect();
+          return;
+        }
+        if (![1008, 4001, 4002].includes(event.code) && failures++ < 4) {
           retry = setTimeout(connect, 500 * 2 ** failures);
           return;
         }
@@ -123,7 +131,7 @@ export default function QuizBattle() {
 
   async function enter(mode) {
     if (mode === "join" && !codePattern.test(code)) {
-      setError("Enter the 10-character room code.");
+      setError("Enter the four-digit room code.");
       return;
     }
     setBusy(true);
@@ -136,8 +144,9 @@ export default function QuizBattle() {
       setIdentity(profile);
       try { localStorage.setItem(identityKey, JSON.stringify({ ...profile, token: token.current })); } catch {}
       setSubmitted("");
-      setActive({ mode, code: mode === "create" ? randomHex(5).toUpperCase() : code });
+      setActive({ mode, code: mode === "create" ? roomCode() : code });
     } catch (err) {
+      if (mounted.current && err.status === 422) setIdentity(null);
       if (mounted.current) setError(err.message === "Failed to fetch" ? "Could not reach multiplayer. Try again." : err.message);
     } finally {
       if (mounted.current) setBusy(false);
@@ -170,8 +179,12 @@ export default function QuizBattle() {
   return (
     <main className="quiz-battle">
       <Link to="/gamer-mode/">← Gamer Mode</Link>
-      <h1>Quiz Battle</h1>
-      <p>Challenge a friend to 10 questions on the meanings of Allah’s names.</p>
+      <header className="battle-hero">
+        <span className="battle-kicker">99 REFLECTIONS <span aria-hidden="true">✧</span> MULTIPLAYER</span>
+        <h1>Quiz Battle</h1>
+        <p>Challenge a friend to 10 questions on the meanings of Allah’s names.</p>
+        <div className="battle-rules"><span>1 vs 1</span><span>15 seconds per question</span><span>Streak bonuses</span></div>
+      </header>
 
       {!endpoint && <p role="status">Online play is currently unavailable.</p>}
       {error && <p className="battle-error" role="alert">{error}</p>}
@@ -185,7 +198,7 @@ export default function QuizBattle() {
           <button type="button" disabled={busy || !username.trim()} onClick={() => enter("create")}>Create private room</button>
           <label>Room code
             <input value={code} onChange={event => setCode(event.target.value.toUpperCase().trim())}
-              autoComplete="off" spellCheck="false" maxLength={10} />
+              autoComplete="off" inputMode="numeric" placeholder="0000" spellCheck="false" maxLength={10} />
           </label>
           <button disabled={busy || !username.trim()}>Join room</button>
         </form>
@@ -194,7 +207,7 @@ export default function QuizBattle() {
       {active && (
         <section className="battle-panel" aria-label="Private room">
           <div className="battle-row">
-            <strong>Room <code>{active.code}</code></strong>
+            <strong>Room <code>{room?.code ?? active.code}</code></strong>
             <button onClick={() => { setActive(null); setRoom(null); setOnline(false); setNotice(""); }}>Leave room</button>
           </div>
           {room && (
@@ -203,7 +216,8 @@ export default function QuizBattle() {
                 {room.players.map((player, index) => (
                   <li key={player.username}>
                     <span>{player.username}{room.you === index ? " (you)" : ""}</span>
-                    <strong>{player.score} / {room.total}</strong>
+                    <strong>{player.score} {room.points ? "pts" : "/ " + room.total}</strong>
+                    {room.points && player.streak > 1 && <small className="battle-streak">🔥 {player.streak} correct in a row</small>}
                     <small>{!player.connected ? "Disconnected" : player.answered && room.phase === "question" ? "Answered" : ""}</small>
                   </li>
                 ))}
@@ -223,6 +237,7 @@ export default function QuizBattle() {
                   <div className="battle-row"><span>Question {room.number} of {room.total}</span>
                     {room.phase === "question" && <span aria-label="Seconds remaining">{seconds}s</span>}
                   </div>
+                  {room.phase === "question" && <progress aria-label="Question time" max={15} value={seconds} />}
                   <h2><span lang="ar" dir="rtl">{room.question.arabic}</span> · {room.question.name}</h2>
                   <div className="battle-options">
                     {room.question.options.map((option, index) => (
@@ -233,7 +248,9 @@ export default function QuizBattle() {
                         }}>{option}</button>
                     ))}
                   </div>
-                  {room.phase === "reveal" && <p role="status">Correct answer · {room.question.options[room.question.correct]}</p>}
+                  {room.phase === "reveal" && <p role="status">Correct answer · {room.question.options[room.question.correct]}
+                    {room.points && <> · {room.earned > 0 ? "+" : ""}{room.earned} pts{room.bonus > 0 && <> including +{room.bonus} streak bonus</>}</>}
+                  </p>}
                 </>
               )}
               {room.phase === "finished" && (
@@ -251,12 +268,12 @@ export default function QuizBattle() {
 
       {endpoint && <section className="battle-panel" aria-labelledby="battle-rankings">
         <div className="battle-row"><h2 id="battle-rankings">Global Top 50</h2><button onClick={loadLeaders}>Refresh</button></div>
-        <p>Ranked by best completed battle score. Tied scores are ordered by username.</p>
+        <p>Ranked by best completed points score. Tied scores are ordered by username.</p>
         {leaderError && <p role="status">Could not load the leaderboard. Try refreshing.</p>}
         {!leaderError && leaders === null && <p role="status">Loading leaderboard…</p>}
         {leaders?.length === 0 && <p>No completed battles yet.</p>}
         {!!leaders?.length && <ol>{leaders.map(player => (
-          <li key={player.username}><span>{player.username}</span> <strong>{player.best} / 10</strong></li>
+          <li key={player.username}><span>{player.username}</span> <strong>{player.best} pts</strong></li>
         ))}</ol>}
       </section>}
     </main>

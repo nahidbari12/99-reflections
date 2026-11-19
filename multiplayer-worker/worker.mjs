@@ -1,3 +1,4 @@
+import { blockedUsername } from "./username.mjs";
 import { DurableObject } from "cloudflare:workers";
 import names from "../src/data/names.jsx";
 
@@ -52,7 +53,7 @@ export default {
       return json({ service: "99 Reflections multiplayer", ready: true }, 200, cors);
     }
     if (path === "/leaderboard" && request.method === "GET") {
-      return json({ players: await rankings(env).top() }, 200, cors);
+      return json({ players: await rankings(env).top(new URL(request.url).searchParams.get("scoring") === "points") }, 200, cors);
     }
     if (path === "/profile" && request.method === "POST") {
       let body;
@@ -67,10 +68,11 @@ export default {
       if (!validToken(body?.token) || !/^\p{L}[\p{L}\p{N}_-]{2,19}$/u.test(username)) {
         return json({ error: "Use 3–20 letters, numbers, underscores or hyphens. Start with a letter." }, 400, cors);
       }
+      if (blockedUsername(username)) return json({ error: "Choose a respectful username without profanity or abusive language." }, 422, cors);
       const result = await rankings(env).register(await playerId(body.token), username);
       return json(result, result.error ? 409 : 200, cors);
     }
-    const room = /^\/rooms\/([A-F0-9]{10})\/(create|join)$/.exec(path);
+    const room = /^\/rooms\/([0-9]{4}|[A-F0-9]{10})\/(create|join)$/.exec(path);
     if (room && request.headers.get("Upgrade")?.toLowerCase() === "websocket") {
       return env.ROOMS.getByName(room[1]).fetch(request);
     }
@@ -86,14 +88,25 @@ export class Leaderboard extends DurableObject {
       id TEXT PRIMARY KEY, username TEXT NOT NULL, normalized TEXT UNIQUE NOT NULL,
       best INTEGER NOT NULL DEFAULT 0, played INTEGER NOT NULL DEFAULT 0
     )`);
+    if (!this.sql.exec("PRAGMA table_info(profiles)").toArray().some(column => column.name === "best_points")) {
+      this.sql.exec("ALTER TABLE profiles ADD COLUMN best_points INTEGER");
+    }
+    this.sql.exec("CREATE INDEX IF NOT EXISTS points_ranking ON profiles(best_points DESC, normalized)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS matches (id TEXT PRIMARY KEY, recorded INTEGER NOT NULL)");
     this.sql.exec("CREATE INDEX IF NOT EXISTS ranking ON profiles(best DESC, normalized)");
   }
 
   register(id, username) {
     const profile = this.profile(id);
-    if (profile) return profile;
+    if (profile && !blockedUsername(profile.username)) return profile;
     const normalized = username.toLowerCase().normalize("NFKC");
+    if (profile) {
+      const updated = this.sql.exec(
+        "UPDATE OR IGNORE profiles SET username = ?, normalized = ? WHERE id = ? RETURNING username",
+        username, normalized, id
+      ).toArray()[0];
+      return updated ?? { error: "That username is taken. Try another." };
+    }
     const added = this.sql.exec(
       "INSERT OR IGNORE INTO profiles(id, username, normalized) VALUES (?, ?, ?) RETURNING username",
       id, username, normalized
@@ -105,20 +118,29 @@ export class Leaderboard extends DurableObject {
     return this.sql.exec("SELECT username FROM profiles WHERE id = ?", id).toArray()[0] ?? null;
   }
 
-  top() {
-    return this.sql.exec(`SELECT username, best FROM profiles
-      WHERE played > 0 ORDER BY best DESC, normalized ASC LIMIT 50`).toArray();
+  top(points) {
+    const query = points
+      ? "SELECT username, best_points AS best FROM profiles WHERE best_points IS NOT NULL ORDER BY best_points DESC, normalized"
+      : "SELECT username, best FROM profiles WHERE played > 0 ORDER BY best DESC, normalized";
+    const top = [];
+    for (const row of this.sql.exec(query)) {
+      if (!blockedUsername(row.username)) top.push(row);
+      if (top.length === 50) break;
+    }
+    return top;
   }
 
-  record(id, players) {
+  record(id, players, points) {
     this.ctx.storage.transactionSync(() => {
       const added = this.sql.exec(
         "INSERT OR IGNORE INTO matches VALUES (?, ?) RETURNING id", id, Date.now()
       ).toArray().length;
       if (!added) return;
       for (const player of players) {
-        this.sql.exec("UPDATE profiles SET best = MAX(best, ?), played = played + 1 WHERE id = ?",
-          player.score, player.id);
+        const update = points
+          ? "UPDATE profiles SET best_points = MAX(COALESCE(best_points, 0), ?) WHERE id = ?"
+          : "UPDATE profiles SET best = MAX(best, ?), played = played + 1 WHERE id = ?";
+        this.sql.exec(update, player.score, player.id);
       }
       this.sql.exec("DELETE FROM matches WHERE recorded < ?", Date.now() - 2 * ROOM_TTL);
     });
@@ -150,21 +172,21 @@ export class BattleRoom extends DurableObject {
   broadcast(room) {
     const question = room.questions?.[room.index];
     const visible = question && ["question", "reveal"].includes(room.phase);
-    const players = room.players.map(({ id, username, score, answer, ready }) => ({
-      username, score, answered: answer !== null, ready, connected: this.connected(id),
+    const players = room.players.map(({ id, username, score, answer, ready, streak }) => ({
+      username, score, streak: streak ?? 0, answered: answer !== null, ready, connected: this.connected(id),
     }));
     for (const ws of this.ctx.getWebSockets()) {
       const you = room.players.findIndex(player => player.id === ws.deserializeAttachment()?.id);
       if (you === -1 || ws.readyState !== 1) continue;
       try {
         ws.send(JSON.stringify({
-          type: "state", code: room.code, phase: room.phase, players, you, total: ROUNDS,
+          type: "state", points: !!room.points, code: room.code, phase: room.phase, players, you, total: ROUNDS,
           number: room.index + 1, match: room.match, remaining: room.deadline ? Math.max(0, room.deadline - Date.now()) : 0,
           question: visible ? {
             arabic: question.arabic, name: question.name, options: question.options,
             correct: room.phase === "reveal" ? question.correct : null,
           } : null,
-          answer: room.players[you].answer, rankingPending: !!room.unrecorded,
+          answer: room.players[you].answer, earned: room.players[you].earned, bonus: room.players[you].bonus, rankingPending: !!room.unrecorded,
         }));
       } catch {
         ws.close(1011, "Connection interrupted");
@@ -173,17 +195,30 @@ export class BattleRoom extends DurableObject {
   }
 
   start(room) {
+    room.points = room.code.length === 4;
     room.match = crypto.randomUUID();
     room.questions = questions();
     room.index = 0;
     room.phase = "question";
     room.deadline = Date.now() + QUESTION_MS;
-    for (const player of room.players) Object.assign(player, { score: 0, answer: null, ready: false });
+    for (const player of room.players) Object.assign(player, { score: 0, streak: 0, answer: null, ready: false });
   }
 
   reveal(room) {
     for (const player of room.players) {
-      if (player.answer === room.questions[room.index].correct) player.score++;
+      const correct = player.answer === room.questions[room.index].correct;
+      if (!room.points) {
+        if (correct) player.score++;
+        continue;
+      }
+      player.streak = correct ? player.streak + 1 : 0;
+      player.bonus = correct ? ({ 3: 5, 5: 10, 10: 20 }[player.streak] ?? 0) : 0;
+      const fraction = player.answerRemaining / QUESTION_MS;
+      const speedPoints = fraction >= 0.75 ? 10 : fraction >= 0.35 ? 5 : 3;
+      const delta = correct ? speedPoints + player.bonus : player.answer === null ? 0 : -3;
+      const nextScore = Math.max(0, player.score + delta);
+      player.earned = nextScore - player.score;
+      player.score = nextScore;
     }
     room.phase = "reveal";
     room.deadline = Date.now() + REVEAL_MS;
@@ -205,17 +240,24 @@ export class BattleRoom extends DurableObject {
       if (message.type !== "hello" || !validToken(message.token)) return ws.close(1008, "Invalid player");
       socket.id = await playerId(message.token);
       const profile = await rankings(this.env).profile(socket.id);
-      if (!profile) return ws.close(1008, "Choose a username first.");
+      if (!profile || blockedUsername(profile.username)) return ws.close(1008, "Choose a username first.");
       return this.ctx.blockConcurrencyWhile(async () => {
         if (ws.readyState !== 1 || ws.deserializeAttachment()?.id) return;
         let room = await this.ctx.storage.get("room");
-        if (room?.expires <= Date.now()) return ws.close(1008, "Room expired. Create a new room.");
+        if (room?.expires <= Date.now()) {
+          if (socket.mode === "join") return ws.close(1008, "Room expired. Create a new room.");
+          if (room.unrecorded) return ws.close(4002, "Room code busy.");
+          for (const old of this.ctx.getWebSockets()) {
+            if (old !== ws && old.deserializeAttachment()?.id) old.close(1008, "Room expired.");
+          }
+          room = null;
+        }
         if (!room && socket.mode === "create") {
           room = { code: socket.code, phase: "lobby", players: [], index: -1, expires: Date.now() + ROOM_TTL };
         }
         if (!room) return ws.close(1008, "Room not found. Check the code.");
         const existing = room.players.some(player => player.id === socket.id);
-        if (socket.mode === "create" && room.players.length && !existing) return ws.close(1008, "Code already used. Create another room.");
+        if (socket.mode === "create" && room.players.length && !existing) return ws.close(4002, "Room code busy.");
         if (!existing && (room.phase !== "lobby" || room.players.length >= 2)) {
           return ws.close(1008, "Room is full.");
         }
@@ -223,6 +265,7 @@ export class BattleRoom extends DurableObject {
         for (const other of this.ctx.getWebSockets()) {
           if (other !== ws && other.deserializeAttachment()?.id === socket.id) other.close(4001, "Room opened on another tab");
         }
+        room.players.find(player => player.id === socket.id).username = profile.username;
         ws.serializeAttachment(socket);
         await this.save(room);
       });
@@ -239,6 +282,7 @@ export class BattleRoom extends DurableObject {
         message.match === room.match && message.number === room.index + 1 && player.answer === null &&
         Number.isInteger(message.choice) && message.choice >= 0 && message.choice < 4) {
         player.answer = message.choice;
+        player.answerRemaining = Math.max(0, room.deadline - Date.now());
         if (room.players.every(item => item.answer !== null)) this.reveal(room);
       } else if (message.type === "rematch" && room.phase === "finished" && !room.unrecorded && bothConnected) {
         player.ready = true;
@@ -296,7 +340,7 @@ export class BattleRoom extends DurableObject {
       }
       if (room.unrecorded) {
         try {
-          await rankings(this.env).record(room.match, room.players);
+          await rankings(this.env).record(room.match, room.players, !!room.points);
           room.unrecorded = false;
         } catch {
           // The alarm retries the same match ID, so a retried write cannot count twice.
