@@ -18,7 +18,8 @@ const GAMES = [
 
 const quizBattle = { id:"quiz-battle", to:"/gamer-mode/quiz-battle", icon:"⚔️", title:"Quiz Battle", skill:"Private rooms", time:"10 questions", difficulty:"1 vs 1" };
 const lanternDuel = { id:"lantern-duel", to:"/gamer-mode/lantern-duel", icon:"🏮", title:"Lantern Match Duel", skill:"Memory race", time:"3 min", difficulty:"1 vs 1" };
-const availableGames = import.meta.env.VITE_MULTIPLAYER_URL ? [...GAMES, quizBattle, lanternDuel] : GAMES;
+const ticTacToeMultiplayer = { id:"tic-tac-toe-multiplayer", to:"/gamer-mode/tic-tac-toe-multiplayer", icon:"⭕", title:"Tic-Tac-Toe Multiplayer", skill:"Play a friend", time:"Quick match", difficulty:"1 vs 1" };
+const availableGames = import.meta.env.VITE_MULTIPLAYER_URL ? [...GAMES, quizBattle, lanternDuel, ticTacToeMultiplayer] : GAMES;
 
 export default function GamerMode() {
   const navigate=useNavigate();

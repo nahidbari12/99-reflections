@@ -26,7 +26,9 @@ async function api(path, body) {
   return data;
 }
 
-export default function QuizBattle({ lantern = false }) {
+export default function QuizBattle({ lantern = false, ticTacToe = false }) {
+  const game = ticTacToe ? "tic-tac-toe" : lantern ? "lantern" : "quiz";
+  const title = ticTacToe ? "Tic-Tac-Toe Multiplayer" : lantern ? "Lantern Match Duel" : "Quiz Battle";
   const [params] = useSearchParams();
   const [identity, setIdentity] = useState(readIdentity);
   const [username, setUsername] = useState(identity?.username || "");
@@ -47,7 +49,7 @@ export default function QuizBattle({ lantern = false }) {
   const leaderboardRequest = useRef(0);
 
   async function loadLeaders() {
-    if (!endpoint || lantern) return;
+    if (!endpoint || game !== "quiz") return;
     const request = ++leaderboardRequest.current;
     setLeaderError(false);
     try {
@@ -83,12 +85,12 @@ export default function QuizBattle({ lantern = false }) {
       const ws = new WebSocket(url);
       socket.current = ws;
       handshake = setTimeout(() => ws.close(), 12000);
-      ws.onopen = () => ws.send(JSON.stringify({ type: "hello", token: token.current, game: lantern ? "lantern" : "quiz" }));
+      ws.onopen = () => ws.send(JSON.stringify({ type: "hello", token: token.current, game }));
       ws.onmessage = event => {
         const state = JSON.parse(event.data);
         if (state.type !== "state" || cancelled) return;
-        if (lantern && state.game !== "lantern") {
-          ws.close(4003, "Lantern Match Duel is currently unavailable.");
+        if (game !== "quiz" && state.game !== game) {
+          ws.close(4003, title + " is currently unavailable.");
           return;
         }
         clearTimeout(handshake);
@@ -126,7 +128,7 @@ export default function QuizBattle({ lantern = false }) {
       socket.current?.close();
       socket.current = null;
     };
-  }, [active, lantern]);
+  }, [active, game, title]);
 
   useEffect(() => {
     if (!room?.until) return;
@@ -188,9 +190,9 @@ export default function QuizBattle({ lantern = false }) {
       <Link to="/gamer-mode/">← Gamer Mode</Link>
       <header className="battle-hero">
         <span className="battle-kicker">99 REFLECTIONS <span aria-hidden="true">✧</span> MULTIPLAYER</span>
-        <h1>{lantern ? "Lantern Match Duel" : "Quiz Battle"}</h1>
-        <p>{lantern ? "Race a friend to match six Names of Allah with their meanings." : "Challenge a friend to 10 questions on the meanings of Allah’s names."}</p>
-        <div className="battle-rules"><span>1 vs 1</span><span>{lantern ? "3-minute race" : "15 seconds per question"}</span><span>{lantern ? "6 pairs" : "Streak bonuses"}</span></div>
+        <h1>{title}</h1>
+        <p>{ticTacToe ? "Invite a friend and get three in a row to win." : lantern ? "Race a friend to match six Names of Allah with their meanings." : "Challenge a friend to 10 questions on the meanings of Allah’s names."}</p>
+        <div className="battle-rules"><span>1 vs 1</span>{!ticTacToe && <><span>{lantern ? "3-minute race" : "15 seconds per question"}</span><span>{lantern ? "6 pairs" : "Streak bonuses"}</span></>}</div>
       </header>
 
       {!endpoint && <p role="status">Online play is currently unavailable.</p>}
@@ -201,7 +203,7 @@ export default function QuizBattle({ lantern = false }) {
             <input required value={username} onChange={event => setUsername(event.target.value)}
               autoComplete="nickname" maxLength={40} readOnly={!!identity?.username} />
           </label>
-          <small>{lantern ? "Your opponent sees your username. This browser remembers your profile." : "Your username and best completed score appear on the public leaderboard. This browser remembers your profile."}</small>
+          <small>{game !== "quiz" ? "Your opponent sees your username. This browser remembers your profile." : "Your username and best completed score appear on the public leaderboard. This browser remembers your profile."}</small>
           <button type="button" disabled={busy || !username.trim()} onClick={() => enter("create")}>Create private room</button>
           <label>Room code
             <input value={code} onChange={event => setCode(event.target.value.toUpperCase().trim())}
@@ -223,7 +225,7 @@ export default function QuizBattle({ lantern = false }) {
                 {room.players.map((player, index) => (
                   <li key={player.username}>
                     <span>{player.username}{room.you === index ? " (you)" : ""}</span>
-                    <strong>{player.score} {room.points ? "pts" : "/ " + room.total}</strong>
+                    <strong>{ticTacToe ? room.grid ? (index === room.starter ? "X" : "O") : "Ready to play" : room.points ? player.score + " pts" : player.score + " / " + room.total}</strong>
                     {room.points && player.streak > 1 && <small className="battle-streak">🔥 {player.streak} correct in a row</small>}
                     <small>{!player.connected ? "Disconnected" : player.answered && room.phase === "question" ? "Answered" : ""}</small>
                   </li>
@@ -237,6 +239,22 @@ export default function QuizBattle({ lantern = false }) {
                     {room.you === 0 && <button disabled={!online || !bothOnline} onClick={() => send("start")}>Start battle</button>}
                   </div>
                   {notice && <small role="status">{notice}</small>}
+                </>
+              )}
+              {room.grid && (
+                <>
+                  {room.phase === "tic-tac-toe" && <p role="status">{!bothOnline ? "Waiting for your opponent to reconnect…" : room.turn === room.you ? "Your turn" : room.players[room.turn].username + "’s turn"}</p>}
+                  <div className="online-tic-tac-toe" aria-label="Tic-Tac-Toe board">
+                    {room.grid.map((mark, index) => (
+                      <button key={index} type="button"
+                        className={room.winningLine?.includes(index) ? "winning-cell" : ""}
+                        disabled={!online || !bothOnline || room.phase !== "tic-tac-toe" || room.turn !== room.you || mark !== null}
+                        aria-label={`Row ${Math.floor(index / 3) + 1}, column ${index % 3 + 1}: ${mark ?? "empty"}`}
+                        onClick={() => send("move", { match: room.match, index, ply: room.grid.filter(Boolean).length })}>
+                        {mark}
+                      </button>
+                    ))}
+                  </div>
                 </>
               )}
               {room.board && (
@@ -293,7 +311,7 @@ export default function QuizBattle({ lantern = false }) {
         </section>
       )}
 
-      {endpoint && !lantern && <section className="battle-panel" aria-labelledby="battle-rankings">
+      {endpoint && game === "quiz" && <section className="battle-panel" aria-labelledby="battle-rankings">
         <div className="battle-row"><h2 id="battle-rankings">Global Top 50</h2><button onClick={loadLeaders}>Refresh</button></div>
         <p>Ranked by best completed points score. Tied scores are ordered by username.</p>
         {leaderError && <p role="status">Could not load the leaderboard. Try refreshing.</p>}

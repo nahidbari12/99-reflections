@@ -4,6 +4,7 @@ import names from "../src/data/names.jsx";
 
 const DUEL_MS = 180000;
 const PAIR_COUNT = 6;
+const WINNING_LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
 const QUESTION_MS = 15000;
 const REVEAL_MS = 2400;
 const ROOM_TTL = 30 * 60 * 1000;
@@ -182,7 +183,7 @@ export class BattleRoom extends DurableObject {
       if (you === -1 || ws.readyState !== 1) continue;
       try {
         ws.send(JSON.stringify({
-          type: "state", game: room.game ?? "quiz", board: room.deck?.map((card, index) => {
+          type: "state", grid: room.grid, turn: room.turn, starter: room.starter, winningLine: room.winningLine, game: room.game ?? "quiz", board: room.deck?.map((card, index) => {
             const player = room.players[you];
             const matched = player.matched.includes(index);
             return { matched, pair: room.phase === "finished" ? card.pair + 1 : undefined, kind: card.kind, text: matched || player.flipped.includes(index) || room.phase === "finished" ? card.text : null };
@@ -203,6 +204,17 @@ export class BattleRoom extends DurableObject {
   start(room) {
     room.points = room.code.length === 4;
     room.match = crypto.randomUUID();
+    if (room.game === "tic-tac-toe") {
+      room.points = false;
+      room.grid = Array(9).fill(null);
+      room.starter = room.starter === 0 ? 1 : 0;
+      room.turn = room.starter;
+      room.winningLine = null;
+      room.phase = "tic-tac-toe";
+      room.deadline = null;
+      for (const player of room.players) Object.assign(player, { score: 0, ready: false });
+      return;
+    }
     if (room.game === "lantern") {
       room.points = false;
       const distinct = new Map(shuffled(names).map(name => [name.meaning, name]));
@@ -291,11 +303,12 @@ export class BattleRoom extends DurableObject {
           }
           room = null;
         }
+        const game = ["lantern", "tic-tac-toe"].includes(message.game) ? message.game : "quiz";
         if (!room && socket.mode === "create") {
-          room = { code: socket.code, game: message.game === "lantern" ? "lantern" : "quiz", phase: "lobby", players: [], index: -1, expires: Date.now() + ROOM_TTL };
+          room = { code: socket.code, game, phase: "lobby", players: [], index: -1, expires: Date.now() + ROOM_TTL };
         }
         if (!room) return ws.close(1008, "Room not found. Check the code.");
-        if ((room.game ?? "quiz") !== (message.game === "lantern" ? "lantern" : "quiz")) {
+        if ((room.game ?? "quiz") !== game) {
           return ws.close(socket.mode === "create" ? 4002 : 1008, "This code belongs to a different game.");
         }
         const existing = room.players.some(player => player.id === socket.id);
@@ -320,6 +333,15 @@ export class BattleRoom extends DurableObject {
       const bothConnected = room.players.length === 2 && room.players.every(item => this.connected(item.id));
       if (message.type === "start" && room.phase === "lobby" && player === room.players[0] && bothConnected) {
         this.start(room);
+      } else if (message.type === "move" && room.phase === "tic-tac-toe" && bothConnected &&
+        message.match === room.match && message.ply === room.grid.filter(cell => cell !== null).length &&
+        player === room.players[room.turn] && Number.isInteger(message.index) && room.grid[message.index] === null) {
+        room.grid[message.index] = room.turn === room.starter ? "X" : "O";
+        const mark = room.grid[message.index];
+        room.winningLine = WINNING_LINES.find(line => line.every(index => room.grid[index] === mark)) ?? null;
+        if (room.winningLine) player.score = 1;
+        if (room.winningLine || room.grid.every(Boolean)) room.phase = "finished";
+        else room.turn = 1 - room.turn;
       } else if (message.type === "flip" && room.phase === "lantern" && Date.now() < room.deadline &&
         message.match === room.match) {
         if (!this.flip(room, player, message.index, Date.now())) return;

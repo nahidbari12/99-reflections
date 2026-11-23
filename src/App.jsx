@@ -181,6 +181,7 @@ function App() {
 
           {/* Gamer Mode Routes */}
           <Route path="/gamer-mode" element={<GamerMode />} />
+          <Route path="/gamer-mode/tic-tac-toe-multiplayer" element={<QuizBattle ticTacToe />} />
           <Route path="/gamer-mode/lantern-duel" element={<QuizBattle lantern />} />
           <Route path="/gamer-mode/quiz-battle" element={<QuizBattle />} />
           <Route path="/gamer-mode/tic-tac-toe" element={<TicTacToeGame />} />

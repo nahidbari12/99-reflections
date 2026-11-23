@@ -70,3 +70,25 @@
 @media (max-width: 480px) {
   .lantern-duel-board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+.online-tic-tac-toe {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: min(100%, 21rem);
+  margin-inline: auto;
+}
+
+.quiz-battle .online-tic-tac-toe button {
+  aspect-ratio: 1;
+  background: #212c45;
+  border: 1px solid #8b733e;
+  color: #fef3c7;
+  font-size: clamp(1.6rem, 8vw, 3rem);
+}
+
+.quiz-battle .online-tic-tac-toe .winning-cell {
+  background: #183e35;
+  border-color: #67a893;
+  opacity: 1;
+}
